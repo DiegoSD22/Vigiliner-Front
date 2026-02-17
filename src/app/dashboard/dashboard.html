@@ -1,0 +1,48 @@
+<div class="h-screen flex flex-col bg-slate-100">
+
+  <!-- TOP BAR -->
+  <header class="h-14 bg-slate-900 text-white flex items-center px-6 justify-between shadow-md">
+    <div class="text-lg font-semibold tracking-wide">
+      🚗 Vigiliner
+    </div>
+
+    <nav class="flex gap-6 text-sm">
+      <span class="hover:text-slate-300 cursor-pointer">Dashboard</span>
+      <span class="hover:text-slate-300 cursor-pointer">Historial</span>
+      <span class="hover:text-slate-300 cursor-pointer">Reportes</span>
+    </nav>
+
+    <div class="text-xs text-slate-400">
+      En línea
+    </div>
+  </header>
+
+  <!-- CONTENIDO -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- SIDEBAR UNIDADES -->
+    <aside class="w-72 bg-white border-r border-slate-200 overflow-y-auto">
+      <div class="p-4 border-b border-slate-200 font-medium text-slate-700">
+        Unidades
+      </div>
+
+      <div class="divide-y divide-slate-100">
+        <div class="p-4 hover:bg-slate-50 cursor-pointer">
+          <div class="font-medium text-sm">Unidad 01</div>
+          <div class="text-xs text-slate-500">En movimiento</div>
+        </div>
+
+        <div class="p-4 hover:bg-slate-50 cursor-pointer">
+          <div class="font-medium text-sm">Unidad 02</div>
+          <div class="text-xs text-slate-500">Detenido</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAPA -->
+    <main class="flex-1 relative">
+      <app-map></app-map>
+    </main>
+
+  </div>
+</div>
