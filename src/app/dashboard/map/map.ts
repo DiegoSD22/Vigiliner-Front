@@ -3,6 +3,13 @@ import * as L from 'leaflet';
 import { Tracking } from '../../core/tracking';
 import 'leaflet-rotatedmarker';
 
+declare module 'leaflet' {
+  interface Marker {
+    setRotationAngle(angle: number): this;
+    setRotationOrigin(origin: string): this;
+  }
+}
+
 @Component({
   selector: 'app-map',
   standalone: true,
@@ -35,7 +42,9 @@ export class Map implements AfterViewInit {
     });
   }
 
+
   updateMarker(data: any) {
+
     const lat = data.lat;
     const lng = data.lng;
     const carIcon = L.icon({
@@ -45,12 +54,39 @@ export class Map implements AfterViewInit {
     });
 
     if (!this.marker) {
-      this.marker = L.marker([lat, lng], { icon: carIcon, rotationAngle: data.heading || 0 } as any).addTo(this.map);
-    } else {
-      this.marker.setLatLng([lat, lng]);
+      this.marker = L.marker([lat, lng], {
+        icon: carIcon
+      }).addTo(this.map);
+      return;
     }
 
-    this.map.panTo([lat, lng]);
+    const start = this.marker.getLatLng();
+    const end = L.latLng(lat, lng);
+
+    const duration = 1000;
+    const frames = 30;
+    let frame = 0;
+
+    const interval = setInterval(() => {
+
+      frame++;
+
+      const progress = frame / frames;
+
+      const currentLat = start.lat + (end.lat - start.lat) * progress;
+      const currentLng = start.lng + (end.lng - start.lng) * progress;
+
+      if (this.marker) {
+        this.marker.setLatLng([currentLat, currentLng]);
+        this.marker.setRotationAngle(data.heading);
+      }
+
+      if (frame >= frames) {
+        clearInterval(interval);
+      }
+
+    }, duration / frames);
   }
+
 
 }
