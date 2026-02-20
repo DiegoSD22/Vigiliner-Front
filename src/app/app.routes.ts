@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { Dashboard } from './dashboard/dashboard'
-import { VigiTableComponent } from './shared/design-system/vigi-table/vigi-table.component';
+import { ListAllUnitsPageComponent } from './dashboard/units/pages/list-all-units-page/list-all-units-page.component';
 
 export const routes: Routes = [
     {path: '', component: Dashboard},
-    {path: 'table', component: VigiTableComponent}
+    {path: 'units', component: ListAllUnitsPageComponent}
 ];
