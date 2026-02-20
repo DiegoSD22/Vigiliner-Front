@@ -7,11 +7,6 @@
         <th mat-header-cell *matHeaderCellDef> {{ col.label }} </th>
         <td mat-cell *matCellDef="let row">
           <span>{{ row | columnValue:col }}</span>
-          @if (col.withEditButton) {
-            <button mat-icon-button color="primary" (click)="onActionClick('edit', row)">
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
         </td>
       </ng-container>
     }

@@ -9,7 +9,6 @@ export interface TableColumn {
     pipe?: 'currency' | 'number' | 'titlecase'; // para aplicar pipes de formato a los valores
     bold?: boolean; // para aplicar negrita a los valores de la columna
     class?: string; // clase css personalizada para la celda
-    withEditButton?: boolean; // para mostrar un botón de edición en cada fila de esta columna
 }
 
 export interface TableConfig {
