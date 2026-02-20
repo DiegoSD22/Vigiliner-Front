@@ -1,29 +1,67 @@
-// Componente base para VigiTable
-import { Component } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
-const ELEMENT_DATA = [
-  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-];
+import { Component, Input, Output, EventEmitter, ViewChild, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
+import { TableColumn, TableConfig, TableAction, PaginationData } from '../../interfaces/vigi-table.interfaces';
+import { ColumnValuePipe } from '../../pipes/column-value.pipe';
 
 @Component({
   selector: 'vigi-table',
   templateUrl: './vigi-table.component.html',
   styleUrls: ['./vigi-table.component.css'],
-  imports: [MatTableModule]
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, 
+    MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator,
+    ColumnValuePipe,
+    MatIconModule
+  ]
 })
-export class VigiTableComponent {
+export class VigiTableComponent implements OnInit, OnChanges {
+  @Input() data: any[] = [];
+  @Input() columns: TableColumn[] = [];
+  @Input() config?: TableConfig;
+  @Input() total: number = 0;
+  @Output() onPaginationChange = new EventEmitter<PaginationData>();
+  @Output() onTableAction = new EventEmitter<TableAction>();
 
-    public dataSource: any = new MatTableDataSource<any>(ELEMENT_DATA);
-    public displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
+  public dataSource = new MatTableDataSource<any>();
+  public displayedColumns: string[] = [];
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  ngOnInit() {
+    this.setupTable();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    this.setupTable();
+  }
+
+  setupTable() {
+    this.dataSource.data = this.data;
+    this.displayedColumns = this.columns.map(col => col.def);
+    if (this.config?.actions && this.config.actions.length > 0 && !this.displayedColumns.includes('actions')) {
+      this.displayedColumns.push('actions');
+    }
+    if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
+    }
+  }
+
+  getColumnByDef(def: string): TableColumn | undefined {
+    return this.columns.find(col => col.def === def);
+  }
+
+  onPaginateChange(event: PageEvent) {
+    const takeFrom = event.pageIndex * event.pageSize;
+    const paginationData: PaginationData = { limit: event.pageSize, from: takeFrom };
+    this.onPaginationChange.emit(paginationData);
+  }
+
+  onActionClick(action: string, row: any) {
+    this.onTableAction.emit({ action, row });
+  }
 }
