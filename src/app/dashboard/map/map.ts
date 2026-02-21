@@ -2,6 +2,7 @@ import { Component, AfterViewInit } from '@angular/core';
 import * as L from 'leaflet';
 import { Tracking } from '../../core/tracking';
 import 'leaflet-rotatedmarker';
+import { UnitsService } from '../../units/units';
 
 declare module 'leaflet' {
   interface Marker {
@@ -20,9 +21,10 @@ declare module 'leaflet' {
 export class Map implements AfterViewInit {
 
   private map!: L.Map;
-  private marker: L.Marker | null = null;
+  private markers: { [key: string]: L.Marker } = {};
+  private units: any[] = [];
 
-  constructor(private tracking: Tracking) {}
+  constructor(private tracking: Tracking, private unitsService: UnitsService) {}
 
   ngAfterViewInit(): void {
 
@@ -36,14 +38,43 @@ export class Map implements AfterViewInit {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    this.tracking.connect('b718240b-9007-42b1-802c-e1612f5467a2'); //ID provisional
-    this.tracking.onLocation((data) => {
+    this.tracking.onLocation((data: any) => {
+      console.log('📍 Nueva ubicación recibida:', data);
       this.updateMarker(data);
+      this.unitsService.updateUnitStatus(data);
     });
   }
 
+  ngOnInit() {
+    // 🔹 Mantener copia local de unidades
+    this.unitsService.units$.subscribe(units => {
+      this.units = units;
+    });
+
+    // 🔹 Escuchar foco desde sidebar
+    this.unitsService.selectedUnit$.subscribe(unit => {
+      if (!unit) return;
+
+      const marker = this.markers[unit.id];
+      if (!marker) return;
+
+      const position = marker.getLatLng();
+
+      this.map.flyTo(position, 18, {
+        duration: 2,
+        easeLinearity: 0.25
+      });
+    });
+
+    this.tracking.onLocation((data: any) => {
+      console.log('📍 Nueva ubicación recibida:', data);
+      this.updateMarker(data);
+      this.unitsService.updateUnitStatus(data);
+    });
+  }
 
   updateMarker(data: any) {
+
 
     const lat = data.lat;
     const lng = data.lng;
@@ -53,14 +84,14 @@ export class Map implements AfterViewInit {
       iconAnchor: [16, 16],
     });
 
-    if (!this.marker) {
-      this.marker = L.marker([lat, lng], {
+    if (!this.markers[data.unitId]) {
+      this.markers[data.unitId] = L.marker([lat, lng], {
         icon: carIcon
       }).addTo(this.map);
       return;
     }
 
-    const start = this.marker.getLatLng();
+    const start = this.markers[data.unitId].getLatLng();
     const end = L.latLng(lat, lng);
 
     const duration = 1000;
@@ -76,9 +107,9 @@ export class Map implements AfterViewInit {
       const currentLat = start.lat + (end.lat - start.lat) * progress;
       const currentLng = start.lng + (end.lng - start.lng) * progress;
 
-      if (this.marker) {
-        this.marker.setLatLng([currentLat, currentLng]);
-        this.marker.setRotationAngle(data.heading);
+      if (this.markers[data.unitId]) {
+        this.markers[data.unitId].setLatLng([currentLat, currentLng]);
+        this.markers[data.unitId].setRotationAngle(data.heading);
       }
 
       if (frame >= frames) {
