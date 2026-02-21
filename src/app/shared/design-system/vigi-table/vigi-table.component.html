@@ -1,0 +1,50 @@
+
+<div class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource">
+    <!-- Columnas dinámicas -->
+    @for (col of columns; track col.def) {
+      <ng-container [matColumnDef]="col.def">
+        <th mat-header-cell *matHeaderCellDef> {{ col.label }} </th>
+        <td mat-cell *matCellDef="let row">
+          <span>{{ row | columnValue:col }}</span>
+        </td>
+      </ng-container>
+    }
+
+    <!-- Columna de acciones si existe -->
+    @if (!!config?.actions?.length) {
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let row">
+          @for (action of (config?.actions ?? []); track action.action) {
+            <button mat-icon-button [attr.color]="action.color || 'primary'" [attr.title]="action.title" (click)="onActionClick(action.action, row)">
+              <mat-icon>{{ action.icon }}</mat-icon>
+            </button>
+          }
+        </td>
+      </ng-container>
+    }
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <!-- Mensaje cuando no hay datos -->
+    @if (dataSource.data.length === 0) {
+      <tr class="mat-row">
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length" style="text-align:center;">
+          {{ config?.noDataMessage || 'No hay información!' }}
+        </td>
+      </tr>
+    }
+  </table>
+
+  <!-- Paginación -->
+  @if (config?.pagination !== false) {
+    <mat-paginator
+      [length]="total"
+      [pageSize]="8"
+      [pageSizeOptions]="[8, 20, 50]"
+      (page)="onPaginateChange($event)">
+    </mat-paginator>
+  }
+</div>
+
