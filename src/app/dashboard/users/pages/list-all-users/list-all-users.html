@@ -14,4 +14,10 @@
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table> -->
 
-<vigi-table [data]="users()" [columns]="tableColumns" />
+<div class="p-6">
+  <button class="btn btn-primary" (click)="openUserModal()">Crear Usuario</button>
+
+  <br> <br>
+
+  <vigi-table [data]="users()" [columns]="tableColumns" />
+</div>

@@ -36,4 +36,8 @@ export class ListAllUsers implements OnInit {
       }
     );
   }
+
+  openUserModal() {
+    
+  }
 }
