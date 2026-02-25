@@ -74,8 +74,6 @@ export class Map implements AfterViewInit {
   }
 
   updateMarker(data: any) {
-
-
     const lat = data.lat;
     const lng = data.lng;
     const carIcon = L.icon({
@@ -88,8 +86,13 @@ export class Map implements AfterViewInit {
       this.markers[data.unitId] = L.marker([lat, lng], {
         icon: carIcon
       }).addTo(this.map);
+  
       return;
     }
+    this.markers[data.unitId].bindTooltip(
+        `🚗 ${data.speed?.toFixed(0) || 0} km/h`,
+        { permanent: true, direction: 'top', className: 'vehicle-label' }
+      );
 
     const start = this.markers[data.unitId].getLatLng();
     const end = L.latLng(lat, lng);

@@ -33,8 +33,9 @@
           <span 
             class="w-2 h-2 rounded-full"
             [ngClass]="{
-              'bg-green-500': unit.status,
-              'bg-gray-400': !unit.status
+              'bg-green-500': unit.status === 'MOVING',
+              'bg-yellow-500': unit.status === 'STOPPED',
+              'bg-gray-400': unit.status === 'OFFLINE'
             }"
           ></span>
 
