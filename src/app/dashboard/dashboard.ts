@@ -1,4 +1,4 @@
-import { UnitsService } from './../units/units';
+import { UnitsService } from './units/services/units.service';
 import { Component } from '@angular/core';
 import { Map } from "./map/map";
 import { Tracking } from '../core/tracking';

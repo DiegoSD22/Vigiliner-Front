@@ -2,7 +2,7 @@ import { Component, AfterViewInit } from '@angular/core';
 import * as L from 'leaflet';
 import { Tracking } from '../../core/tracking';
 import 'leaflet-rotatedmarker';
-import { UnitsService } from '../../units/units';
+import { UnitsService } from '../units/services/units.service';
 
 declare module 'leaflet' {
   interface Marker {

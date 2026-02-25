@@ -1,4 +1,4 @@
-import { UnitsService } from './../../units/units';
+import { UnitsService } from '../../dashboard/units/services/units.service';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth } from '../auth';

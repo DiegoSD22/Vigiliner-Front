@@ -1,4 +1,4 @@
-import { UnitsService } from './units/units';
+import { UnitsService } from './dashboard/units/services/units.service';
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Tracking } from './core/tracking';

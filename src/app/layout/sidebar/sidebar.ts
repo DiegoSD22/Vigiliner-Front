@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UnitsService } from '../../units/units';
+import { UnitsService } from '../../dashboard/units/services/units.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
