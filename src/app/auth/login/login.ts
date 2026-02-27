@@ -1,39 +1,67 @@
 import { UnitsService } from '../../dashboard/units/services/units.service';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { NonNullableFormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Auth } from '../auth';
-import { FormsModule } from '@angular/forms';
 import { Tracking } from '../../core/tracking';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  standalone: true,
+  imports: [ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
 
-  email = '';
-  password = '';
+  public isLoading = signal(false);
+  public errorMessage = signal<string | null>(null);
 
-  constructor(private router: Router, private auth: Auth, private tracking: Tracking, private UnitsService: UnitsService) {}
+  public loginForm: FormGroup;
+
+  constructor(
+    private fb: NonNullableFormBuilder,
+    private router: Router,
+    private auth: Auth,
+    private tracking: Tracking,
+    private unitsService: UnitsService
+  ) {
+    this.loginForm = this.fb.group({
+      email: ['', Validators.required],
+      password: ['', Validators.required],
+    });
+  }
 
   login() {
-    this.auth.login(this.email, this.password).subscribe({
+
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    const { email, password } = this.loginForm.getRawValue();
+
+    this.auth.login(email, password).subscribe({
       next: (response) => {
+        this.isLoading.set(false);
+
         localStorage.setItem('access_token', response.access_token);
         this.tracking.connect(response.access_token);
-        this.UnitsService.units$.subscribe(units => {
-          if (!units || units.length === 0) return;
-        units.forEach(unit => {
-          this.tracking.joinUnit(unit.id);
+
+        this.unitsService.units$.subscribe(units => {
+          if (!units?.length) return;
+          units.forEach(unit => this.tracking.joinUnit(unit.id));
         });
-      });
-        this.UnitsService.loadMyUnits();
+
+        this.unitsService.loadMyUnits();
         this.router.navigate(['/dashboard']);
       },
-      error: (error) => {
-        console.error('Error al iniciar sesión:', error);
+      error: () => {
+        this.isLoading.set(false);
+        this.errorMessage.set('Credenciales incorrectas');
       }
     });
   }

@@ -1,13 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormField, MatLabel } from '@angular/material/select';
+import { MatError, MatFormField, MatLabel } from '@angular/material/select';
 import { MatInput } from '@angular/material/input';
 import { UsersService } from '../../services/users.service';
 
 @Component({
   selector: 'app-user-form-dialog',
-  imports: [MatDialogModule, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput],
+  imports: [MatDialogModule, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError],
   templateUrl: './user-form-dialog.html',
   styleUrl: './user-form-dialog.css'
 })

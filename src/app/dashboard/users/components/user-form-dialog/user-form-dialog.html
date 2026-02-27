@@ -1,31 +1,71 @@
-<h2 mat-dialog-title>
-  Crear Usuario
-</h2>
+<div mat-dialog-title class="text-center">
+  <strong>Crear Usuario</strong>
+
+</div>
 
 <mat-dialog-content class="mat-typography">
   <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="flex flex-col gap-4">
-    
+
+    <!-- Nombre -->
     <mat-form-field>
       <mat-label>Nombre</mat-label>
       <input matInput formControlName="name" placeholder="Ingrese el nombre del usuario">
+
+      @if (userForm.get('name')?.invalid && userForm.get('name')?.touched) {
+        <mat-error>
+          El nombre es requerido
+        </mat-error>
+      }
     </mat-form-field>
 
+    <!-- Email -->
     <mat-form-field>
       <mat-label>Email</mat-label>
       <input matInput formControlName="email" placeholder="Ingrese el email del usuario">
+
+      @if (userForm.get('email')?.errors?.['required'] && userForm.get('email')?.touched) {
+        <mat-error>
+          El email es requerido
+        </mat-error>
+      }
+
+      @if (userForm.get('email')?.errors?.['email'] && userForm.get('email')?.touched) {
+        <mat-error>
+          El email no es válido
+        </mat-error>
+      }
     </mat-form-field>
 
+    <!-- Password -->
     <mat-form-field>
       <mat-label>Contraseña</mat-label>
       <input matInput formControlName="password" placeholder="Ingrese la contraseña del usuario" type="password">
+
+      @if (userForm.get('password')?.errors?.['required'] && userForm.get('password')?.touched) {
+        <mat-error>
+          La contraseña es requerida
+        </mat-error>
+      }
+
+      @if (userForm.get('password')?.errors?.['minlength'] && userForm.get('password')?.touched) {
+        <mat-error>
+          La contraseña debe tener mínimo 6 caracteres
+        </mat-error>
+      }
     </mat-form-field>
 
     <mat-dialog-actions align="center" class="flex gap-4">
-      <button mat-dialog-close class="btn btn-outline text-black" type="button">Cancelar</button>
-      <button class="btn btn-outline btn-success" type="submit">Guardar</button>
-      <!-- <button matButton [mat-dialog-close]="true" cdkFocusInitial>Install</button> -->
+      <button mat-dialog-close class="btn btn-outline text-black" type="button">
+        Cancelar
+      </button>
+
+      <button
+        class="btn btn-outline btn-success disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-300"
+        type="submit"
+        [disabled]="userForm.invalid">
+        Guardar
+      </button>
     </mat-dialog-actions>
 
   </form>
-
-  </mat-dialog-content>
+</mat-dialog-content>

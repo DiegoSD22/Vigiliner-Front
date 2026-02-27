@@ -12,38 +12,64 @@
       </p>
     </div>
 
-    <!-- Form -->
-    <form (ngSubmit)="login()" class="space-y-5">
+    <!-- ✅ Mensaje de error general con signal -->
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+      <span>{{ errorMessage() }}</span>
+      </div>
+    }
 
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">
-          Usuario
+    <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-5">
+
+      <!-- Usuario -->
+       <div class="mt-10">
+        <label class="form-control w-full">
+          <span class="label-text text-slate-400">Usuario</span>
+
+          <input
+            type="text"
+            formControlName="email"
+            class="input input-bordered w-full bg-slate-800 text-white"
+            [class.input-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
+
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <span class="label">
+                <span class="label-text-alt text-error">
+                  El correo/usuario es requerido
+                </span>
+              </span>
+          }
         </label>
-        <input
-          type="text"
-          [(ngModel)]="email"
-          name="email"
-          class="w-full px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
       </div>
 
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">
-          Contraseña
-        </label>
+      <!-- Password -->
+      <label class="form-control w-full mt-4">
+        <span class="mt-5 label-text text-slate-400">Contraseña</span>
+
         <input
           type="password"
-          [(ngModel)]="password"
-          name="password"
-          class="w-full px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-      </div>
+          formControlName="password"
+          class="input input-bordered w-full bg-slate-800 text-white"
+          [class.input-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <span class="label">
+            <span class="label-text-alt text-error">
+              La contraseña es requerida
+            </span>
+          </span>
+        }
+      </label>
 
       <button
-        type="submit"
-        class="w-full py-2 bg-green-600 hover:bg-green-500 transition text-white font-medium rounded-lg"
-      >
-        Iniciar sesión
+        type="button"
+        (click)="login()"
+        [disabled]="isLoading()"
+        class="mt-5 w-full py-2 bg-green-600 hover:bg-green-500 transition text-white font-medium rounded-lg">
+        @if (isLoading()) {
+          <span class="loading loading-spinner loading-sm"></span>
+        }
+        {{ isLoading() ? 'Iniciando...' : 'Iniciar sesión' }}
       </button>
 
     </form>
