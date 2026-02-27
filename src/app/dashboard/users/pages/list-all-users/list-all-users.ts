@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { UsersService } from '../../services/users.service';
 import { UserDto } from '../../interfaces/users.dto';
 import {MatTableModule} from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
 import { VigiTableComponent } from '../../../../shared/design-system/vigi-table/vigi-table.component';
 import { TableColumn } from '../../../../shared/interfaces/vigi-table.interfaces';
+import { UserFormDialog } from '../../components/user-form-dialog/user-form-dialog';
 
 @Component({
   selector: 'app-list-all-users',
@@ -15,6 +17,7 @@ import { TableColumn } from '../../../../shared/interfaces/vigi-table.interfaces
 export class ListAllUsers implements OnInit {
 
   private readonly usersService = inject(UsersService);
+  private readonly dialog = inject(MatDialog);
 
   users = signal<UserDto[]>([]);
   tableColumns: TableColumn[] = [
@@ -38,6 +41,9 @@ export class ListAllUsers implements OnInit {
   }
 
   openUserModal() {
-    
+    const dialogRef = this.dialog.open( UserFormDialog, {
+      width: '400px',
+      data: {}
+    });
   }
 }
