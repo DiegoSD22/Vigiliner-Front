@@ -1,3 +1,289 @@
 :host {
   display: block;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+.landing-root {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in oklab, var(--mat-sys-primary) 25%, transparent) 0%, transparent 48%),
+    radial-gradient(circle at 95% 20%, color-mix(in oklab, var(--mat-sys-tertiary) 20%, transparent) 0%, transparent 40%),
+    linear-gradient(160deg, var(--mat-sys-surface) 15%, var(--mat-sys-surface-container) 100%);
+}
+
+.landing-glow {
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  border-radius: 999px;
+  filter: blur(60px);
+  opacity: 0.35;
+}
+
+.landing-glow-a {
+  top: -7rem;
+  left: -4rem;
+  height: 18rem;
+  width: 18rem;
+  background: color-mix(in oklab, var(--mat-sys-primary) 50%, transparent);
+  animation: driftA 12s ease-in-out infinite alternate;
+}
+
+.landing-glow-b {
+  right: -5rem;
+  bottom: 5rem;
+  height: 16rem;
+  width: 16rem;
+  background: color-mix(in oklab, var(--mat-sys-tertiary) 55%, transparent);
+  animation: driftB 14s ease-in-out infinite alternate;
+}
+
+.brand-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.landing-root :is(p, a, button, .stat-title, .stat-desc) {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.glass-card {
+  position: relative;
+  z-index: 1;
+  border: 1px solid color-mix(in oklab, var(--mat-sys-outline) 35%, transparent);
+  background: color-mix(in oklab, var(--mat-sys-surface-container-high) 84%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+}
+
+.map-sim {
+  border: 1px solid color-mix(in oklab, var(--mat-sys-outline) 30%, transparent);
+}
+
+.map-canvas {
+  position: relative;
+  height: 12rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--mat-sys-surface-container-highest) 84%, transparent), transparent),
+    color-mix(in oklab, var(--mat-sys-surface-container) 88%, transparent);
+}
+
+.map-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.45;
+}
+
+.map-roads {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.map-roads path {
+  fill: none;
+  stroke: color-mix(in oklab, var(--mat-sys-primary) 45%, white);
+  stroke-linecap: round;
+  stroke-width: 6;
+  opacity: 0.75;
+}
+
+.car {
+  position: absolute;
+  z-index: 3;
+  min-width: 3.4rem;
+  border: 1px solid color-mix(in oklab, var(--mat-sys-primary) 65%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--mat-sys-primary-container) 75%, transparent);
+  color: var(--mat-sys-on-primary-container);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.car::before {
+  content: '';
+  position: absolute;
+  left: 0.35rem;
+  top: 50%;
+  height: 0.38rem;
+  width: 0.38rem;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: var(--mat-sys-tertiary);
+  box-shadow: 0 0 8px var(--mat-sys-tertiary);
+}
+
+.car-1 {
+  animation: carRouteA 8s linear infinite;
+}
+
+.car-2 {
+  animation: carRouteB 10s linear infinite;
+}
+
+.car-3 {
+  animation: carRouteC 9s linear infinite;
+}
+
+.map-node {
+  position: absolute;
+  z-index: 2;
+  height: 0.7rem;
+  width: 0.7rem;
+  border-radius: 999px;
+  border: 2px solid var(--mat-sys-secondary);
+  background: color-mix(in oklab, var(--mat-sys-secondary) 50%, transparent);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--mat-sys-secondary) 40%, transparent);
+  animation: pulseNode 2.4s ease-out infinite;
+}
+
+.map-node-a {
+  top: 2.2rem;
+  left: 18%;
+}
+
+.map-node-b {
+  top: 7.5rem;
+  left: 52%;
+  animation-delay: 0.8s;
+}
+
+.map-node-c {
+  top: 4.8rem;
+  left: 78%;
+  animation-delay: 1.5s;
+}
+
+.reveal {
+  position: relative;
+  z-index: 1;
+  animation: riseIn 0.7s ease-out both;
+}
+
+.reveal-delay-1 {
+  animation-delay: 0.14s;
+}
+
+.reveal-delay-2 {
+  animation-delay: 0.24s;
+}
+
+.reveal-delay-3 {
+  animation-delay: 0.34s;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes driftA {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(2.2rem, 1rem);
+  }
+}
+
+@keyframes driftB {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-1.8rem, -1.2rem);
+  }
+}
+
+@keyframes carRouteA {
+  0% {
+    transform: translate(2rem, 8.8rem);
+  }
+  25% {
+    transform: translate(7rem, 5.8rem);
+  }
+  55% {
+    transform: translate(14rem, 5.2rem);
+  }
+  80% {
+    transform: translate(20rem, 7.6rem);
+  }
+  100% {
+    transform: translate(24rem, 4rem);
+  }
+}
+
+@keyframes carRouteB {
+  0% {
+    transform: translate(3rem, 2.2rem);
+  }
+  30% {
+    transform: translate(9rem, 5.4rem);
+  }
+  60% {
+    transform: translate(16rem, 7.8rem);
+  }
+  100% {
+    transform: translate(23rem, 9.4rem);
+  }
+}
+
+@keyframes carRouteC {
+  0% {
+    transform: translate(9rem, 0.9rem);
+  }
+  40% {
+    transform: translate(10.8rem, 5rem);
+  }
+  75% {
+    transform: translate(9.6rem, 8.8rem);
+  }
+  100% {
+    transform: translate(8.6rem, 10.2rem);
+  }
+}
+
+@keyframes pulseNode {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--mat-sys-secondary) 45%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (max-width: 640px) {
+  .map-canvas {
+    height: 10.6rem;
+  }
+
+  .car {
+    font-size: 0.62rem;
+    min-width: 2.9rem;
+    padding: 0.28rem 0.45rem;
+  }
+}
