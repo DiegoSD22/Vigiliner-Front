@@ -1,7 +1,7 @@
-import { UnitsService } from './dashboard/units/services/units.service';
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Tracking } from './core/tracking';
+import { UnitsService } from './modules/dashboard/units/services/units.service';
 
 @Component({
   selector: 'app-root',
