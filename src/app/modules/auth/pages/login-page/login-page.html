@@ -1,79 +1,115 @@
-<div class="min-h-screen bg-slate-950 flex items-center justify-center">
-
-  <div class="w-full max-w-md bg-slate-900 rounded-2xl shadow-2xl p-8 border border-slate-800">
-
-    <!-- Logo / título -->
-    <div class="text-center mb-8">
-      <h1 class="text-2xl font-bold text-white tracking-wide">
-        🚗 Vigiliner
-      </h1>
-      <p class="text-slate-400 text-sm mt-2">
-        Plataforma de Rastreo Satelital
-      </p>
-    </div>
-
-    <!-- ✅ Mensaje de error general con signal -->
-    @if (errorMessage()) {
-      <div class="alert alert-error">
-      <span>{{ errorMessage() }}</span>
+<main class="login-shell flex min-h-screen items-center px-4 py-8 sm:px-8">
+  <div class="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-base-300/60 bg-base-100/80 shadow-2xl backdrop-blur md:grid-cols-2">
+    <section class="brand-panel relative hidden p-10 md:flex md:flex-col md:justify-between">
+      <div>
+        <p class="badge badge-primary badge-outline mb-6">Vigiliner Security Grid</p>
+        <h1 class="brand-title text-4xl leading-tight">
+          Gestiona tus unidades con
+          <span class="text-primary">visibilidad total</span>
+        </h1>
+        <p class="mt-4 max-w-sm opacity-80">
+          Plataforma de monitoreo, rastreo y respuesta operativa para equipos de seguridad en tiempo real.
+        </p>
       </div>
-    }
+      <div class="stats stats-vertical bg-base-100/70 shadow-lg lg:stats-horizontal">
+        <div class="stat">
+          <div class="stat-title">Disponibilidad</div>
+          <div class="stat-value text-primary">99.8%</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Unidades activas</div>
+          <div class="stat-value text-secondary">128</div>
+        </div>
+      </div>
+    </section>
 
-    <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-5">
+    <section class="p-6 sm:p-10">
+      <div class="mb-8 flex items-center justify-between">
+        <a class="flex items-center gap-3" routerLink="/">
+          <div class="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-content shadow-lg shadow-primary/30">
+            V
+          </div>
+          <div>
+            <p class="brand-title text-lg leading-none">Vigiliner</p>
+            <p class="text-xs opacity-70">Acceso seguro</p>
+          </div>
+        </a>
+        <a class="btn btn-ghost btn-sm" routerLink="/">Volver</a>
+      </div>
 
-      <!-- Usuario -->
-       <div class="mt-10">
+      <h2 class="brand-title text-3xl">Inicia sesion</h2>
+      <p class="mt-2 text-sm opacity-75">Ingresa con tus credenciales para acceder al panel operativo.</p>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error mt-6" role="alert" aria-live="polite">
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="mt-7 space-y-5" novalidate>
         <label class="form-control w-full">
-          <span class="label-text text-slate-400">Usuario</span>
-
+          <span class="label-text mb-2 text-sm">Correo</span>
           <input
-            type="text"
+            type="email"
             formControlName="email"
-            class="input input-bordered w-full bg-slate-800 text-white"
-            [class.input-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
-
-            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-              <span class="label">
-                <span class="label-text-alt text-error">
-                  El correo/usuario es requerido
-                </span>
-              </span>
+            autocomplete="email"
+            class="input input-bordered w-full bg-base-200"
+            placeholder="operador@vigiliner.com"
+            [class.input-error]="emailControl?.invalid && emailControl?.touched"
+          />
+          @if (emailControl?.touched && emailControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">El correo es obligatorio.</span>
+          }
+          @if (emailControl?.touched && emailControl?.errors?.['email']) {
+            <span class="label-text-alt mt-2 text-error">Ingresa un correo valido.</span>
           }
         </label>
-      </div>
 
-      <!-- Password -->
-      <label class="form-control w-full mt-4">
-        <span class="mt-5 label-text text-slate-400">Contraseña</span>
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Contrasena</span>
+          <div class="relative">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              class="input input-bordered w-full bg-base-200 pr-24"
+              placeholder="Minimo 6 caracteres"
+              [class.input-error]="passwordControl?.invalid && passwordControl?.touched"
+            />
+            <button
+              type="button"
+              class="btn btn-ghost btn-xs absolute right-2 top-1/2 -translate-y-1/2"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+          @if (passwordControl?.touched && passwordControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">La contrasena es obligatoria.</span>
+          }
+          @if (passwordControl?.touched && passwordControl?.errors?.['minlength']) {
+            <span class="label-text-alt mt-2 text-error">La contrasena debe tener al menos 6 caracteres.</span>
+          }
+        </label>
 
-        <input
-          type="password"
-          formControlName="password"
-          class="input input-bordered w-full bg-slate-800 text-white"
-          [class.input-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+        <div class="flex items-center justify-between">
+          <label class="label cursor-pointer gap-2">
+            <input type="checkbox" formControlName="rememberMe" class="checkbox checkbox-primary checkbox-sm" />
+            <span class="label-text text-sm">Recordarme</span>
+          </label>
+          <button type="button" class="btn btn-link btn-sm p-0" (click)="forgotPassword()">
+            ¿Olvidaste tu contraseña?
+          </button>
+        </div>
 
-        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-          <span class="label">
-            <span class="label-text-alt text-error">
-              La contraseña es requerida
-            </span>
-          </span>
-        }
-      </label>
-
-      <button
-        type="button"
-        (click)="login()"
-        [disabled]="isLoading()"
-        class="mt-5 w-full py-2 bg-green-600 hover:bg-green-500 transition text-white font-medium rounded-lg">
-        @if (isLoading()) {
-          <span class="loading loading-spinner loading-sm"></span>
-        }
-        {{ isLoading() ? 'Iniciando...' : 'Iniciar sesión' }}
-      </button>
-
-    </form>
-
+        <button type="submit" [disabled]="isLoading()" class="btn btn-primary w-full mt-3">
+          @if (isLoading()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          {{ isLoading() ? 'Ingresando...' : 'Entrar al panel' }}
+        </button>
+      </form>
+    </section>
   </div>
-
-</div>
+</main>
