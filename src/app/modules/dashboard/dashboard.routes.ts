@@ -1,16 +1,28 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from '../auth/guards/auth-guard';
-import { roleGuard } from '../auth/guards/role-guard';
 
 export const dashboardRoutes: Routes = [
   {
     path: '',
-    canActivate: [],
-    data: { roles: ['admin'] },
     loadComponent: () =>
-      import('./pages/admin-dashboard-page/admin-dashboard-page').then(
-        (m) => m.AdminDashboardPage
+      import('./pages/dashboard-shell/dashboard-shell').then(
+        (m) => m.DashboardShell
       ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/admin-overview-page/admin-overview-page').then(
+            (m) => m.AdminOverviewPage
+          ),
+      },
+      {
+        path: 'unidades',
+        loadComponent: () =>
+          import('./pages/admin-dashboard-page/admin-dashboard-page').then(
+            (m) => m.AdminDashboardPage
+          ),
+      },
+      { path: '**', redirectTo: '' },
+    ],
   },
-  { path: '**', redirectTo: '' },
 ];

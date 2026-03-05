@@ -1,12 +1,8 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from '../auth/guards/auth-guard';
-import { roleGuard } from '../auth/guards/role-guard';
 
 export const superDashboardRoutes: Routes = [
   {
     path: '',
-    canActivate: [],
-    data: { roles: ['super-admin'] },
     loadComponent: () =>
       import('./pages/super-dashboard-shell/super-dashboard-shell').then(
         (m) => m.SuperDashboardShell
