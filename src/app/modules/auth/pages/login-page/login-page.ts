@@ -50,10 +50,6 @@ export class LoginPage {
     this.showPassword.update((value) => !value);
   }
 
-  forgotPassword() {
-    this.errorMessage.set('Contacta al administrador del sistema para recuperar tu contraseña.');
-  }
-
   login() {
 
     if (this.loginForm.invalid) {
@@ -89,7 +85,8 @@ export class LoginPage {
             units.forEach((unit) => this.tracking.joinUnit(unit.id));
           });
 
-        this.router.navigate(['/dashboard']);
+        const role = this.auth.getUserRole(response);
+        this.router.navigate([role === 'super-admin' ? '/super-dashboard' : '/dashboard']);
       },
       error: () => {
         this.isLoading.set(false);

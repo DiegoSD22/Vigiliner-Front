@@ -1,14 +1,16 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { Auth } from '../services/auth';
 
 export const loginGuard: CanActivateFn = () => {
   const router = inject(Router);
-  const access_token = localStorage.getItem('access_token');
+  const auth = inject(Auth);
 
-  if (access_token) {
-    router.navigate(['/dashboard']);
+  if (auth.isLoggedIn()) {
+    const role = auth.getUserRole();
+    router.navigate([role === 'super-admin' ? '/super-dashboard' : '/dashboard']);
     return false;
   }
-  
+
   return true;
 };

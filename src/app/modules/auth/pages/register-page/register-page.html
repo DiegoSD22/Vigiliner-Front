@@ -1,0 +1,182 @@
+<main class="auth-shell flex min-h-screen items-center px-4 py-8 sm:px-8">
+  <div class="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-base-300/60 bg-base-100/80 shadow-2xl backdrop-blur md:grid-cols-2">
+    <section class="brand-panel relative hidden p-10 md:flex md:flex-col md:justify-between">
+      <div>
+        <p class="badge badge-primary badge-outline mb-6">Vigiliner Security Grid</p>
+        <h1 class="brand-title text-4xl leading-tight">
+          Únete al sistema de
+          <span class="text-primary">monitoreo avanzado</span>
+        </h1>
+        <p class="mt-4 max-w-sm opacity-80">
+          Crea tu cuenta y obtén acceso completo a la plataforma de rastreo y respuesta operativa.
+        </p>
+      </div>
+      <div class="rounded-2xl border border-base-300/60 bg-base-100/70 p-5">
+        <p class="text-xs uppercase tracking-wide opacity-70">Beneficios del registro</p>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li class="flex items-center gap-2">
+            <span class="text-primary">✓</span>
+            <span>Acceso completo al panel operativo</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-primary">✓</span>
+            <span>Monitoreo en tiempo real</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-primary">✓</span>
+            <span>Alertas prioritarias configurables</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="p-6 sm:p-10">
+      <div class="mb-8 flex items-center justify-between">
+        <a class="flex items-center gap-3" routerLink="/">
+          <div class="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-content shadow-lg shadow-primary/30">
+            V
+          </div>
+          <div>
+            <p class="brand-title text-lg leading-none">Vigiliner</p>
+            <p class="text-xs opacity-70">Crear cuenta</p>
+          </div>
+        </a>
+        <a class="btn btn-ghost btn-sm" routerLink="/auth/login">Ya tengo cuenta</a>
+      </div>
+
+      <h2 class="brand-title text-3xl">Crea tu cuenta</h2>
+      <p class="mt-2 text-sm opacity-75">Completa la informacion para registrarte en el sistema.</p>
+
+      @if (successMessage()) {
+        <div class="alert alert-success mt-6" role="alert" aria-live="polite">
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="alert alert-error mt-6" role="alert" aria-live="polite">
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="registerForm" (ngSubmit)="register()" class="mt-7 space-y-4" novalidate>
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Nombre completo</span>
+          <input
+            type="text"
+            formControlName="name"
+            autocomplete="name"
+            class="input input-bordered w-full bg-base-200"
+            placeholder="Juan Perez"
+            [class.input-error]="nameControl?.invalid && nameControl?.touched"
+          />
+          @if (nameControl?.touched && nameControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">El nombre es obligatorio.</span>
+          }
+          @if (nameControl?.touched && nameControl?.errors?.['minlength']) {
+            <span class="label-text-alt mt-2 text-error">El nombre debe tener al menos 3 caracteres.</span>
+          }
+        </label>
+
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Correo electronico</span>
+          <input
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            class="input input-bordered w-full bg-base-200"
+            placeholder="operador@vigiliner.com"
+            [class.input-error]="emailControl?.invalid && emailControl?.touched"
+          />
+          @if (emailControl?.touched && emailControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">El correo es obligatorio.</span>
+          }
+          @if (emailControl?.touched && emailControl?.errors?.['email']) {
+            <span class="label-text-alt mt-2 text-error">Ingresa un correo valido.</span>
+          }
+        </label>
+
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Contrasena</span>
+          <div class="relative">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="new-password"
+              class="input input-bordered w-full bg-base-200 pr-24"
+              placeholder="Minimo 6 caracteres"
+              [class.input-error]="passwordControl?.invalid && passwordControl?.touched"
+            />
+            <button
+              type="button"
+              class="btn btn-ghost btn-xs absolute right-2 top-1/2 -translate-y-1/2"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+          @if (passwordControl?.touched && passwordControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">La contrasena es obligatoria.</span>
+          }
+          @if (passwordControl?.touched && passwordControl?.errors?.['minlength']) {
+            <span class="label-text-alt mt-2 text-error">La contrasena debe tener al menos 6 caracteres.</span>
+          }
+        </label>
+
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Confirmar contrasena</span>
+          <div class="relative">
+            <input
+              [type]="showConfirmPassword() ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              autocomplete="new-password"
+              class="input input-bordered w-full bg-base-200 pr-24"
+              placeholder="Repite tu contrasena"
+              [class.input-error]="confirmPasswordControl?.invalid && confirmPasswordControl?.touched"
+            />
+            <button
+              type="button"
+              class="btn btn-ghost btn-xs absolute right-2 top-1/2 -translate-y-1/2"
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="showConfirmPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            >
+              {{ showConfirmPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+          @if (confirmPasswordControl?.touched && confirmPasswordControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">Debes confirmar la contrasena.</span>
+          }
+          @if (confirmPasswordControl?.touched && confirmPasswordControl?.errors?.['passwordMismatch']) {
+            <span class="label-text-alt mt-2 text-error">Las contrasenas no coinciden.</span>
+          }
+        </label>
+
+        <label class="label cursor-pointer justify-start gap-3">
+          <input type="checkbox" formControlName="acceptTerms" class="checkbox checkbox-primary checkbox-sm" />
+          <span class="label-text text-sm">
+            Acepto los
+            <a class="link-primary" href="#" target="_blank">terminos y condiciones</a>
+            y la
+            <a class="link-primary" href="#" target="_blank">politica de privacidad</a>
+          </span>
+        </label>
+        @if (acceptTermsControl?.touched && acceptTermsControl?.errors?.['required']) {
+          <span class="label-text-alt text-error">Debes aceptar los terminos y condiciones.</span>
+        }
+
+        <button type="submit" [disabled]="isLoading()" class="btn btn-primary w-full">
+          @if (isLoading()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          {{ isLoading() ? 'Creando cuenta...' : 'Crear cuenta' }}
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm opacity-70">
+        ¿Ya tienes cuenta?
+        <a class="link-primary" routerLink="/auth/login">Inicia sesion</a>
+      </p>
+    </section>
+  </div>
+</main>

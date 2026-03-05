@@ -13,7 +13,10 @@
             </div>
         </div>
 
-        <a class="btn btn-outline btn-sm" routerLink="/auth">Iniciar sesion</a>
+        <div class="flex items-center gap-2">
+            <a class="btn btn-ghost btn-sm" routerLink="/auth/register">Registrarme</a>
+            <a class="btn btn-outline btn-sm" routerLink="/auth/login">Iniciar sesion</a>
+        </div>
     </header>
 
     <section class="mx-auto grid w-full max-w-6xl gap-10 px-6 pb-12 pt-4 lg:grid-cols-2 lg:items-center lg:px-10">
@@ -28,7 +31,8 @@
                 logística y respuesta rápida.
             </p>
             <div class="mt-8 flex flex-wrap items-center gap-3">
-                <a class="btn btn-primary" routerLink="/auth">Entrar al panel</a>
+                <a class="btn btn-primary" routerLink="/auth/login">Entrar al panel</a>
+                <a class="btn btn-outline" routerLink="/auth/register">Crear cuenta</a>
                 <button class="btn btn-ghost">Ver demo</button>
             </div>
         </div>

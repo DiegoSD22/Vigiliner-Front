@@ -1,4 +1,4 @@
-<main class="login-shell flex min-h-screen items-center px-4 py-8 sm:px-8">
+<main class="auth-shell flex min-h-screen items-center px-4 py-8 sm:px-8">
   <div class="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-base-300/60 bg-base-100/80 shadow-2xl backdrop-blur md:grid-cols-2">
     <section class="brand-panel relative hidden p-10 md:flex md:flex-col md:justify-between">
       <div>
@@ -98,9 +98,9 @@
             <input type="checkbox" formControlName="rememberMe" class="checkbox checkbox-primary checkbox-sm" />
             <span class="label-text text-sm">Recordarme</span>
           </label>
-          <button type="button" class="btn btn-link btn-sm p-0" (click)="forgotPassword()">
+          <a class="btn btn-link btn-sm p-0" routerLink="/auth/forgot-password">
             ¿Olvidaste tu contraseña?
-          </button>
+          </a>
         </div>
 
         <button type="submit" [disabled]="isLoading()" class="btn btn-primary w-full mt-3">
@@ -109,6 +109,11 @@
           }
           {{ isLoading() ? 'Ingresando...' : 'Entrar al panel' }}
         </button>
+
+        <p class="text-center text-sm opacity-75">
+          ¿No tienes cuenta?
+          <a class="link-primary" routerLink="/auth/register">Crear cuenta</a>
+        </p>
       </form>
     </section>
   </div>
