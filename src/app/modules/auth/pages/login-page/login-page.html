@@ -2,7 +2,7 @@
   <div class="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-base-300/60 bg-base-100/80 shadow-2xl backdrop-blur md:grid-cols-2">
     <section class="brand-panel relative hidden p-10 md:flex md:flex-col md:justify-between">
       <div>
-        <p class="badge badge-primary badge-outline mb-6">Vigiliner Security Grid</p>
+        <p class="badge badge-primary badge-outline mb-6">Vigiliner By Estevez.jor</p>
         <h1 class="brand-title text-4xl leading-tight">
           Gestiona tus unidades con
           <span class="text-primary">visibilidad total</span>
@@ -11,28 +11,17 @@
           Plataforma de monitoreo, rastreo y respuesta operativa para equipos de seguridad en tiempo real.
         </p>
       </div>
-      <div class="stats stats-vertical bg-base-100/70 shadow-lg lg:stats-horizontal">
-        <div class="stat">
-          <div class="stat-title">Disponibilidad</div>
-          <div class="stat-value text-primary">99.8%</div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">Unidades activas</div>
-          <div class="stat-value text-secondary">128</div>
-        </div>
-      </div>
     </section>
 
     <section class="p-6 sm:p-10">
       <div class="mb-8 flex items-center justify-between">
         <a class="flex items-center gap-3" routerLink="/">
-          <div class="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-content shadow-lg shadow-primary/30">
-            V
-          </div>
-          <div>
-            <p class="brand-title text-lg leading-none">Vigiliner</p>
-            <p class="text-xs opacity-70">Acceso seguro</p>
-          </div>
+          <img
+            src="/logo-estevez-jor.png"
+            alt="Logo Estevez.Jor"
+            class="logo-glow-soft h-12 w-auto object-contain"
+            loading="lazy"
+          />
         </a>
         <a class="btn btn-ghost btn-sm" routerLink="/">Volver</a>
       </div>
@@ -48,20 +37,17 @@
 
       <form [formGroup]="loginForm" (ngSubmit)="login()" class="mt-7 space-y-5" novalidate>
         <label class="form-control w-full">
-          <span class="label-text mb-2 text-sm">Correo</span>
+          <span class="label-text mb-2 text-sm">Correo o usuario</span>
           <input
-            type="email"
-            formControlName="email"
-            autocomplete="email"
+            type="text"
+            formControlName="identifier"
+            autocomplete="username"
             class="input input-bordered w-full bg-base-200"
-            placeholder="operador@vigiliner.com"
-            [class.input-error]="emailControl?.invalid && emailControl?.touched"
+            placeholder="super-admin o operador@vigiliner.com"
+            [class.input-error]="identifierControl?.invalid && identifierControl?.touched"
           />
-          @if (emailControl?.touched && emailControl?.errors?.['required']) {
-            <span class="label-text-alt mt-2 text-error">El correo es obligatorio.</span>
-          }
-          @if (emailControl?.touched && emailControl?.errors?.['email']) {
-            <span class="label-text-alt mt-2 text-error">Ingresa un correo valido.</span>
+          @if (identifierControl?.touched && identifierControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">El correo o usuario es obligatorio.</span>
           }
         </label>
 

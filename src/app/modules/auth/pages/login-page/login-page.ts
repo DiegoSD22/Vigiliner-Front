@@ -6,6 +6,7 @@ import { Auth } from '../../services/auth';
 import { Tracking } from '../../../../core/tracking';
 import { UnitsService } from '../../../dashboard/units/services/units.service';
 import { filter, take } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -29,17 +30,17 @@ export class LoginPage {
     private tracking: Tracking,
     private unitsService: UnitsService
   ) {
-    const savedEmail = localStorage.getItem('rememberedEmail');
+    const savedIdentifier = localStorage.getItem('rememberedIdentifier');
     
     this.loginForm = this.fb.group({
-      email: [savedEmail || '', [Validators.required, Validators.email]],
+      identifier: [savedIdentifier || '', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [!!savedEmail],
+      rememberMe: [!!savedIdentifier],
     });
   }
 
-  get emailControl() {
-    return this.loginForm.get('email');
+  get identifierControl() {
+    return this.loginForm.get('identifier');
   }
 
   get passwordControl() {
@@ -60,19 +61,19 @@ export class LoginPage {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const { email, password, rememberMe } = this.loginForm.getRawValue();
+    const { identifier, password, rememberMe } = this.loginForm.getRawValue();
 
     if (rememberMe) {
-      localStorage.setItem('rememberedEmail', email);
+      localStorage.setItem('rememberedIdentifier', identifier);
     } else {
-      localStorage.removeItem('rememberedEmail');
+      localStorage.removeItem('rememberedIdentifier');
     }
 
-    this.auth.login(email, password).subscribe({
+    this.auth.login(identifier, password).subscribe({
       next: (response) => {
         this.isLoading.set(false);
 
-        this.tracking.connect(response.access_token);
+        this.tracking.connect(response.accessToken);
 
         this.unitsService.loadMyUnits();
 
@@ -88,10 +89,44 @@ export class LoginPage {
         const role = this.auth.getUserRole(response);
         this.router.navigate([role === 'super-admin' ? '/super-dashboard' : '/dashboard']);
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.isLoading.set(false);
-        this.errorMessage.set('Credenciales incorrectas');
+        this.errorMessage.set(this.getBackendErrorMessage(error));
       }
     });
+  }
+
+  private getBackendErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'No se pudo conectar con el servidor. Verifica que el backend esté encendido.';
+    }
+
+    const payload = error.error;
+    if (payload && typeof payload === 'object') {
+      if (typeof payload.message === 'string' && payload.message.trim()) {
+        return payload.message;
+      }
+
+      if (Array.isArray(payload.message) && payload.message.length > 0) {
+        const firstMessage = payload.message.find((item: unknown) => typeof item === 'string');
+        if (typeof firstMessage === 'string' && firstMessage.trim()) {
+          return firstMessage;
+        }
+      }
+
+      if (payload.errors && typeof payload.errors === 'object') {
+        const firstFieldErrors = Object.values(payload.errors).find((value) => Array.isArray(value)) as unknown[] | undefined;
+        const firstFieldMessage = firstFieldErrors?.find((value) => typeof value === 'string');
+        if (typeof firstFieldMessage === 'string' && firstFieldMessage.trim()) {
+          return firstFieldMessage;
+        }
+      }
+    }
+
+    if (error.status === 401) {
+      return 'Credenciales inválidas';
+    }
+
+    return 'No fue posible iniciar sesión. Intenta nuevamente.';
   }
 }
