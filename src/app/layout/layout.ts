@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { Map } from "../dashboard/map/map";
+import { MapComponent } from "../dashboard/map/map";
 
 @Component({
   selector: 'app-layout',
-  imports: [Map],
+  imports: [MapComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })

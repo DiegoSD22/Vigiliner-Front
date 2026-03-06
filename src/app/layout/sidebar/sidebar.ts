@@ -17,6 +17,7 @@ export class Sidebar{
   }
 
   selectUnit(unit: any) {
+    console.log('🚀 Unidad seleccionada:', unit);
     this.unitsService.selectUnit(unit);
   }
 }

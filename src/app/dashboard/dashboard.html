@@ -25,18 +25,30 @@
   <div class="flex flex-1 overflow-hidden">
 
     <!-- SIDEBAR UNIDADES -->
-    <aside class="w-72 bg-white border-r border-slate-200 overflow-y-auto">
-      
-
+    <div class="bg-white border-r border-slate-200 transition-all duration-300"
+         [ngClass]="{
+           'w-72': isSidebarOpen,
+           'w-0': !isSidebarOpen,
+         }">
       <app-sidebar></app-sidebar>
-
-    </aside>
+    </div>
 
 
     <!-- MAPA -->
     <main class="flex-1 relative">
       <app-map></app-map>
     </main>
+
+    <button
+      mat-fab
+      (click)="toggleSidebar()"
+      class="!absolute bottom-6 right-6 z-[3000] shadow-2xl"
+      [ngClass]="{'right-6': !selectedUnit, 'right-[22rem]': selectedUnit}"
+      color="primary">
+    <mat-icon>
+      {{ isSidebarOpen ? 'directions_car' : 'menu' }}
+    </mat-icon>
+    </button>
 
   </div>
 </div>
