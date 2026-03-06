@@ -1,0 +1,106 @@
+<main class="auth-shell flex min-h-screen items-center px-4 py-8 sm:px-8">
+  <div class="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-base-300/60 bg-base-100/80 shadow-2xl backdrop-blur md:grid-cols-2">
+    <section class="brand-panel relative hidden p-10 md:flex md:flex-col md:justify-between">
+      <div>
+        <p class="badge badge-primary badge-outline mb-6">Vigiliner By Estevez.jor</p>
+        <h1 class="brand-title text-4xl leading-tight">
+          Gestiona tus unidades con
+          <span class="text-primary">visibilidad total</span>
+        </h1>
+        <p class="mt-4 max-w-sm opacity-80">
+          Plataforma de monitoreo, rastreo y respuesta operativa para equipos de seguridad en tiempo real.
+        </p>
+      </div>
+    </section>
+
+    <section class="p-6 sm:p-10">
+      <div class="mb-8 flex items-center justify-between">
+        <a class="flex items-center gap-3" routerLink="/">
+          <img
+            src="/logo-estevez-jor.png"
+            alt="Logo Estevez.Jor"
+            class="logo-glow-soft h-12 w-auto object-contain"
+            loading="lazy"
+          />
+        </a>
+        <a class="btn btn-ghost btn-sm" routerLink="/">Volver</a>
+      </div>
+
+      <h2 class="brand-title text-3xl">Inicia sesion</h2>
+      <p class="mt-2 text-sm opacity-75">Ingresa con tus credenciales para acceder al panel operativo.</p>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error mt-6" role="alert" aria-live="polite">
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="mt-7 space-y-5" novalidate>
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Correo o usuario</span>
+          <input
+            type="text"
+            formControlName="identifier"
+            autocomplete="username"
+            class="input input-bordered w-full bg-base-200"
+            placeholder="super-admin o operador@vigiliner.com"
+            [class.input-error]="identifierControl?.invalid && identifierControl?.touched"
+          />
+          @if (identifierControl?.touched && identifierControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">El correo o usuario es obligatorio.</span>
+          }
+        </label>
+
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Contrasena</span>
+          <div class="relative">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              class="input input-bordered w-full bg-base-200 pr-24"
+              placeholder="Minimo 6 caracteres"
+              [class.input-error]="passwordControl?.invalid && passwordControl?.touched"
+            />
+            <button
+              type="button"
+              class="btn btn-ghost btn-xs absolute right-2 top-1/2 -translate-y-1/2"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+          @if (passwordControl?.touched && passwordControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">La contrasena es obligatoria.</span>
+          }
+          @if (passwordControl?.touched && passwordControl?.errors?.['minlength']) {
+            <span class="label-text-alt mt-2 text-error">La contrasena debe tener al menos 6 caracteres.</span>
+          }
+        </label>
+
+        <div class="flex items-center justify-between">
+          <label class="label cursor-pointer gap-2">
+            <input type="checkbox" formControlName="rememberMe" class="checkbox checkbox-primary checkbox-sm" />
+            <span class="label-text text-sm">Recordarme</span>
+          </label>
+          <a class="btn btn-link btn-sm p-0" routerLink="/auth/forgot-password">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
+        <button type="submit" [disabled]="isLoading()" class="btn btn-primary w-full mt-3">
+          @if (isLoading()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          {{ isLoading() ? 'Ingresando...' : 'Entrar al panel' }}
+        </button>
+
+        <p class="text-center text-sm opacity-75">
+          ¿No tienes cuenta?
+          <a class="link-primary" routerLink="/auth/register">Crear cuenta</a>
+        </p>
+      </form>
+    </section>
+  </div>
+</main>

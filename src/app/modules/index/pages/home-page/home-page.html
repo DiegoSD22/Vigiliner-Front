@@ -1,0 +1,132 @@
+<main class="landing-root min-h-screen text-base-content">
+    <div class="landing-glow landing-glow-a"></div>
+    <div class="landing-glow landing-glow-b"></div>
+
+    <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6 lg:px-10">
+        <div class="flex items-center gap-3">
+            <div class="grid h-12 w-12 place-items-center rounded-xl text-primary-content shadow-lg shadow-primary/30">
+                <img src="/logo-estevez-jor.png" alt="Logo Estevez.Jor" class="logo-glow h-8 w-auto object-contain" loading="lazy" />
+            </div>
+            <div>
+                <p class="brand-title text-lg">Vigiliner</p>
+                <p class="text-xs opacity-70">Monitoreo en tiempo real</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a class="btn btn-ghost btn-sm" routerLink="/auth/register">Registrarme</a>
+            <a class="btn btn-outline btn-sm" routerLink="/auth/login">Iniciar sesion</a>
+        </div>
+    </header>
+
+    <section class="mx-auto grid w-full max-w-6xl gap-10 px-6 pb-12 pt-4 lg:grid-cols-2 lg:items-center lg:px-10">
+        <div class="reveal">
+            <p class="badge badge-primary badge-outline mb-5">Plataforma Inteligente de Vigilancia</p>
+            <h1 class="brand-title text-4xl leading-tight sm:text-5xl lg:text-6xl">
+                Control total de tus unidades,
+                <span class="text-primary">desde un solo panel.</span>
+            </h1>
+            <p class="mt-6 max-w-xl text-base opacity-85 sm:text-lg">
+                Supervisa ubicaciones, estado y actividad operativa con una experiencia clara para equipos de seguridad,
+                logística y respuesta rápida.
+            </p>
+            <div class="mt-8 flex flex-wrap items-center gap-3">
+                <a class="btn btn-primary" routerLink="/auth/login">Entrar al panel</a>
+                <a class="btn btn-outline" routerLink="/auth/register">Crear cuenta</a>
+                <button class="btn btn-ghost">Ver demo</button>
+            </div>
+        </div>
+
+        <div class="reveal reveal-delay-1">
+            <article class="glass-card rounded-3xl p-4 sm:p-6">
+                <div class="mb-4 flex items-center justify-between">
+                    <p class="text-sm opacity-70">Estado operativo</p>
+                    <span class="badge badge-success badge-sm">Estable</span>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div class="stat rounded-2xl bg-base-100/70">
+                        <div class="stat-title">Unidades activas</div>
+                        <div class="stat-value text-primary">128</div>
+                        <div class="stat-desc">+14 hoy</div>
+                    </div>
+                    <div class="stat rounded-2xl bg-base-100/70">
+                        <div class="stat-title">Alertas criticas</div>
+                        <div class="stat-value text-error">03</div>
+                        <div class="stat-desc">Atencion inmediata</div>
+                    </div>
+                </div>
+                <div class="map-sim mt-4 rounded-2xl bg-base-100/70 p-4">
+                    <div class="mb-3 flex items-center justify-between">
+                        <p class="text-xs uppercase tracking-wide opacity-70">Mapa tactico en vivo</p>
+                        <span class="badge badge-primary badge-outline badge-xs">Tracking</span>
+                    </div>
+
+                    <div class="map-canvas">
+                        <div class="map-grid"></div>
+                        <svg viewBox="0 0 600 260" class="map-roads" aria-hidden="true" focusable="false">
+                            <path d="M40 190 C120 120, 200 90, 320 110 S520 160, 560 90" />
+                            <path d="M70 60 C180 140, 300 180, 520 210" />
+                            <path d="M150 30 C180 70, 200 120, 170 220" />
+                        </svg>
+
+                        <div class="car car-1">U-21</div>
+                        <div class="car car-2">U-08</div>
+                        <div class="car car-3">U-34</div>
+
+                        <span class="map-node map-node-a"></span>
+                        <span class="map-node map-node-b"></span>
+                        <span class="map-node map-node-c"></span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="mx-auto w-full max-w-6xl px-6 pb-8 lg:px-10">
+        <div class="reveal reveal-delay-2 grid gap-4 sm:grid-cols-3">
+            <article class="stat rounded-2xl bg-base-100/70 shadow-md backdrop-blur">
+                <div class="stat-title">Tiempo de respuesta</div>
+                <div class="stat-value text-primary">-32%</div>
+                <div class="stat-desc">Promedio semanal</div>
+            </article>
+            <article class="stat rounded-2xl bg-base-100/70 shadow-md backdrop-blur">
+                <div class="stat-title">Disponibilidad</div>
+                <div class="stat-value text-secondary">99.8%</div>
+                <div class="stat-desc">Servicios en linea</div>
+            </article>
+            <article class="stat rounded-2xl bg-base-100/70 shadow-md backdrop-blur">
+                <div class="stat-title">Eventos procesados</div>
+                <div class="stat-value text-accent">1.2M</div>
+                <div class="stat-desc">Ultimos 30 dias</div>
+            </article>
+        </div>
+    </section>
+
+    <section class="mx-auto w-full max-w-6xl px-6 pb-16 lg:px-10">
+        <div class="reveal reveal-delay-3 grid gap-4 md:grid-cols-3">
+            <article class="card border border-base-300/60 bg-base-100/70 shadow-lg">
+                <div class="card-body">
+                    <p class="text-xs uppercase tracking-wide opacity-70">Rastreo</p>
+                    <h2 class="card-title">Ubicacion en vivo</h2>
+                    <p class="opacity-80">Visualiza recorridos, paradas y zonas de interes sin perder contexto operativo.</p>
+                </div>
+            </article>
+
+            <article class="card border border-base-300/60 bg-base-100/70 shadow-lg">
+                <div class="card-body">
+                    <p class="text-xs uppercase tracking-wide opacity-70">Seguridad</p>
+                    <h2 class="card-title">Alertas priorizadas</h2>
+                    <p class="opacity-80">Clasifica incidentes por nivel de riesgo y ejecuta protocolos desde el tablero.</p>
+                </div>
+            </article>
+
+            <article class="card border border-base-300/60 bg-base-100/70 shadow-lg">
+                <div class="card-body">
+                    <p class="text-xs uppercase tracking-wide opacity-70">Coordinacion</p>
+                    <h2 class="card-title">Equipos sincronizados</h2>
+                    <p class="opacity-80">Comparte contexto entre operadores, supervisores y campo en una sola vista.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>

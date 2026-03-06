@@ -1,0 +1,56 @@
+<main class="auth-shell flex min-h-screen items-center px-4 py-8 sm:px-8">
+  <div class="mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-base-300/60 bg-base-100/80 shadow-2xl backdrop-blur">
+    <section class="p-6 sm:p-10">
+      <div class="mb-8 flex items-center justify-center">
+        <a class="flex items-center gap-3" routerLink="/">
+          <div class="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-content shadow-lg shadow-primary/30">
+            V
+          </div>
+          <div>
+            <p class="brand-title text-lg leading-none">Vigiliner</p>
+            <p class="text-xs opacity-70">Verificacion de correo</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="text-center">
+        @if (isLoading()) {
+          <div class="flex flex-col items-center gap-4">
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+            <h2 class="brand-title text-2xl">Verificando tu correo...</h2>
+            <p class="text-sm opacity-75">Por favor espera mientras confirmamos tu cuenta.</p>
+          </div>
+        }
+
+        @if (successMessage()) {
+          <div class="flex flex-col items-center gap-4">
+            <div class="grid h-16 w-16 place-items-center rounded-full bg-success/20 text-4xl text-success">
+              ✓
+            </div>
+            <h2 class="brand-title text-2xl text-success">¡Verificacion exitosa!</h2>
+            <div class="alert alert-success" role="alert" aria-live="polite">
+              <span>{{ successMessage() }}</span>
+            </div>
+            <a class="btn btn-primary" routerLink="/auth/login">Ir al inicio de sesion</a>
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <div class="flex flex-col items-center gap-4">
+            <div class="grid h-16 w-16 place-items-center rounded-full bg-error/20 text-4xl text-error">
+              ✕
+            </div>
+            <h2 class="brand-title text-2xl text-error">Error de verificacion</h2>
+            <div class="alert alert-error" role="alert" aria-live="polite">
+              <span>{{ errorMessage() }}</span>
+            </div>
+            <div class="flex gap-3">
+              <a class="btn btn-ghost" routerLink="/auth/resend-verification">Reenviar codigo</a>
+              <a class="btn btn-primary" routerLink="/auth/login">Volver al login</a>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</main>

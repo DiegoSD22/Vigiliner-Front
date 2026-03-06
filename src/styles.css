@@ -1,4 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+/* Global style entrypoint: Material theme is defined in material-theme.scss */
 @import "tailwindcss";
-@plugin "daisyui";
+
+@plugin "daisyui" {
+	themes: light --default;
+}
+
+/* Keep DaisyUI tokens aligned with Angular Material system variables. */
+:root {
+	--color-base-100: var(--mat-sys-surface);
+	--color-base-200: var(--mat-sys-surface-container-low);
+	--color-base-300: var(--mat-sys-surface-container);
+	--color-base-content: var(--mat-sys-on-surface);
+
+	--color-primary: var(--mat-sys-primary);
+	--color-primary-content: var(--mat-sys-on-primary);
+	--color-secondary: var(--mat-sys-secondary);
+	--color-secondary-content: var(--mat-sys-on-secondary);
+	--color-accent: var(--mat-sys-tertiary);
+	--color-accent-content: var(--mat-sys-on-tertiary);
+	--color-neutral: var(--mat-sys-surface-container-highest);
+	--color-neutral-content: var(--mat-sys-on-surface);
+	--color-error: var(--mat-sys-error);
+}
