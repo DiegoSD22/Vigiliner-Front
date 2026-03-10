@@ -1,37 +1,46 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
-import { NonNullableFormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  NonNullableFormBuilder,
+  Validators,
+  FormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
-import { Tracking } from '../../../../core/tracking';
-import { UnitsService } from '../../../dashboard/units/services/units.service';
-import { filter, take } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { finalize } from 'rxjs';
 
+/**
+ * LoginPage Component
+ * Responsabilidad única: Renderizar y gestionar el formulario de login
+ * OnPush: Optimizado para Angular 14+
+ */
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [ReactiveFormsModule, RouterModule],
   templateUrl: './login-page.html',
   styleUrl: './login-page.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPage {
+  // === Dependencias ===
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly router = inject(Router);
+  private readonly auth = inject(Auth);
 
-  public isLoading = signal(false);
-  public errorMessage = signal<string | null>(null);
-  public showPassword = signal(false);
+  // === Signals para estado reactivo ===
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+  readonly showPassword = signal(false);
 
-  public loginForm: FormGroup;
+  // === Template access ===
+  loginForm: FormGroup;
 
-  constructor(
-    private fb: NonNullableFormBuilder,
-    private router: Router,
-    private auth: Auth,
-    private tracking: Tracking,
-    private unitsService: UnitsService
-  ) {
+  constructor() {
     const savedIdentifier = localStorage.getItem('rememberedIdentifier');
-    
+
     this.loginForm = this.fb.group({
       identifier: [savedIdentifier || '', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -39,6 +48,7 @@ export class LoginPage {
     });
   }
 
+  // === Getters para template ===
   get identifierControl() {
     return this.loginForm.get('identifier');
   }
@@ -47,12 +57,13 @@ export class LoginPage {
     return this.loginForm.get('password');
   }
 
-  togglePasswordVisibility() {
+  // === Acciones del usuario ===
+
+  togglePasswordVisibility(): void {
     this.showPassword.update((value) => !value);
   }
 
-  login() {
-
+  login(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -63,59 +74,70 @@ export class LoginPage {
 
     const { identifier, password, rememberMe } = this.loginForm.getRawValue();
 
+    // Persistir preferencia "Remember me"
     if (rememberMe) {
       localStorage.setItem('rememberedIdentifier', identifier);
     } else {
       localStorage.removeItem('rememberedIdentifier');
     }
 
-    this.auth.login(identifier, password).subscribe({
-      next: (response) => {
-        this.isLoading.set(false);
-
-        this.tracking.connect(response.accessToken);
-
-        this.unitsService.loadMyUnits();
-
-        this.unitsService.units$
-          .pipe(
-            filter((units) => !!units?.length),
-            take(1)
-          )
-          .subscribe((units) => {
-            units.forEach((unit) => this.tracking.joinUnit(unit.id));
-          });
-
-        const role = this.auth.getUserRole(response);
-        this.router.navigate([role === 'super-admin' ? '/super-dashboard' : '/dashboard']);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(this.getBackendErrorMessage(error));
-      }
-    });
+    // Llamada al servidor
+    this.auth
+      .login(identifier, password)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: (result) => this.handleLoginSuccess(result),
+        error: (error: HttpErrorResponse) => this.handleLoginError(error),
+      });
   }
 
-  private getBackendErrorMessage(error: HttpErrorResponse): string {
+  // === Handlers privados ===
+
+  private handleLoginSuccess(result: { primaryRole?: string }): void {
+    // Determinar destino basado en rol
+    const role = result.primaryRole || 'admin';
+    const destination = role === 'super-admin' ? '/super-dashboard' : '/dashboard';
+
+    this.router.navigate([destination]);
+  }
+
+  private handleLoginError(error: HttpErrorResponse): void {
+    const message = this.extractErrorMessage(error);
+    this.errorMessage.set(message);
+  }
+
+  /**
+   * Extrae mensaje de error del response HTTP
+   * Manejo robusto de múltiples formatos de respuesta
+   */
+  private extractErrorMessage(error: HttpErrorResponse): string {
+    // Error de conexión
     if (error.status === 0) {
       return 'No se pudo conectar con el servidor. Verifica que el backend esté encendido.';
     }
 
     const payload = error.error;
+
+    // Intenta extraer del formato estándar
     if (payload && typeof payload === 'object') {
+      // message: string
       if (typeof payload.message === 'string' && payload.message.trim()) {
         return payload.message;
       }
 
-      if (Array.isArray(payload.message) && payload.message.length > 0) {
+      // message: string[]
+      if (Array.isArray(payload.message)) {
         const firstMessage = payload.message.find((item: unknown) => typeof item === 'string');
         if (typeof firstMessage === 'string' && firstMessage.trim()) {
           return firstMessage;
         }
       }
 
+      // errors: { field: string[] }
       if (payload.errors && typeof payload.errors === 'object') {
-        const firstFieldErrors = Object.values(payload.errors).find((value) => Array.isArray(value)) as unknown[] | undefined;
+        const firstFieldErrors = Object.values(payload.errors).find(
+          (value) => Array.isArray(value)
+        ) as unknown[] | undefined;
         const firstFieldMessage = firstFieldErrors?.find((value) => typeof value === 'string');
         if (typeof firstFieldMessage === 'string' && firstFieldMessage.trim()) {
           return firstFieldMessage;
@@ -123,10 +145,16 @@ export class LoginPage {
       }
     }
 
+    // Errores HTTP conocidos
     if (error.status === 401) {
-      return 'Credenciales inválidas';
+      return 'Credenciales inválidas. Verifica tu correo/usuario y contraseña.';
     }
 
+    if (error.status === 429) {
+      return 'Demasiados intentos de login. Intenta más tarde.';
+    }
+
+    // Fallback genérico
     return 'No fue posible iniciar sesión. Intenta nuevamente.';
   }
 }
