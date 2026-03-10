@@ -1,15 +1,11 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
-import {
-  NonNullableFormBuilder,
-  Validators,
-  FormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { Auth } from '../../services/auth';
 import { HttpErrorResponse } from '@angular/common/http';
+import { NonNullableFormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+
 import { finalize } from 'rxjs';
+
+import { Auth } from '../../services/auth';
 
 /**
  * LoginPage Component

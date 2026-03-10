@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { TableColumn } from '../interfaces/vigi-table.interfaces';
 import { DatePipe, TitleCasePipe } from '@angular/common';
+
+import { TableColumn } from '../interfaces/vigi-table.interfaces';
 
 @Pipe({
     name: 'columnValue'

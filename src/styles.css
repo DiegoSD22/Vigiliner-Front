@@ -5,6 +5,8 @@
 	themes: light --default;
 }
 
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
 /* Keep DaisyUI tokens aligned with Angular Material system variables. */
 :root {
 	--color-base-100: var(--mat-sys-surface);

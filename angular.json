@@ -19,6 +19,9 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "mapbox-gl"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -36,13 +39,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2.2MB",
+                  "maximumError": "2.8MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "6kB",
+                  "maximumError": "10kB"
                 }
               ],
               "outputHashing": "all",
@@ -57,6 +60,9 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
+              "allowedCommonJsDependencies": [
+                "mapbox-gl"
+              ],
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

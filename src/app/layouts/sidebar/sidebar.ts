@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UnitsService } from '../../modules/dashboard/units/services/units.service';
+import { UnitsService } from '@vigiliner/dashboard-modules/units/services/units.service';
 
 @Component({
   selector: 'app-sidebar',

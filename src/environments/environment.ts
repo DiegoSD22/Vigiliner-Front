@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  API_URL: 'http://localhost:3000' // Cambia esto según tu backend
+  API_URL: 'http://localhost:3000',
+  MAPBOX_API_KEY: ''
 };

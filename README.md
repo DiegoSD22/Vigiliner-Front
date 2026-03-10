@@ -57,3 +57,35 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Dashboard Map Module
+
+The dashboard now includes a modular map foundation under `src/app/modules/dashboard/modules/map` prepared for `ngx-mapbox-gl`.
+
+### Install Dependencies
+
+```bash
+npm install ngx-mapbox-gl mapbox-gl
+npm install -D @types/mapbox-gl
+```
+
+### Configure Environment
+
+Add your token in `src/environments/environment.ts`:
+
+```typescript
+export const environment = {
+	// ...existing values
+	MAPBOX_ACCESS_TOKEN: 'your-mapbox-public-token',
+};
+```
+
+### Current Foundation
+
+- DTOs: location, unit-location, marker, bounds
+- Services: mapbox wrapper, map state with Angular signals, marker mapper
+- Folder structure: feature-first (`modules/map/components`, `modules/map/services`, `modules/map/dtos`)
+
+### Next Step
+
+Create `AdminUnitMapComponent` using `ngx-mapbox-gl` and connect it to `UnitsService` to render all organization units.

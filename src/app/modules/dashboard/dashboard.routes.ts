@@ -16,10 +16,17 @@ export const dashboardRoutes: Routes = [
           ),
       },
       {
+        path: 'mapa',
+        loadComponent: () =>
+          import('./modules/map/pages/admin-units-map-page/admin-units-map-page').then(
+            (m) => m.AdminUnitsMapPage
+          ),
+      },
+      {
         path: 'unidades',
         loadComponent: () =>
-          import('./pages/admin-dashboard-page/admin-dashboard-page').then(
-            (m) => m.AdminDashboardPage
+          import('./modules/units/pages/list-all-units-page/list-all-units-page.component').then(
+            (m) => m.ListAllUnitsPageComponent
           ),
       },
       { path: '**', redirectTo: '' },

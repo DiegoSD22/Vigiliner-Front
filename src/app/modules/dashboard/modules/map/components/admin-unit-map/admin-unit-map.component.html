@@ -1,0 +1,271 @@
+<div class="relative h-full w-full">
+
+  <!-- Contenedor del mapa Mapbox GL -->
+  <div
+    #mapContainer
+    class="map-canvas absolute inset-0 h-full w-full"
+    [class.map-canvas--ready]="mapLoaded()"
+  ></div>
+
+  @if (!mapLoaded()) {
+    <div
+      class="map-skeleton absolute inset-0 z-20 overflow-hidden rounded-[1.75rem]"
+      aria-live="polite"
+      aria-busy="true"
+      role="status"
+    >
+      <div class="map-skeleton__grid absolute inset-0"></div>
+      <div class="map-skeleton__glow map-skeleton__glow--one absolute -left-24 top-8 h-56 w-56 rounded-full"></div>
+      <div class="map-skeleton__glow map-skeleton__glow--two absolute bottom-8 right-10 h-72 w-72 rounded-full"></div>
+      <div class="map-skeleton__shimmer absolute inset-0"></div>
+
+      <div class="absolute left-6 top-6 flex items-center gap-3 rounded-2xl border border-white/45 bg-white/78 px-4 py-3 shadow-[0_16px_40px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+        <div class="skeleton h-10 w-10 shrink-0 rounded-2xl"></div>
+        <div class="space-y-2">
+          <div class="skeleton h-3 w-28 rounded-full"></div>
+          <div class="skeleton h-2.5 w-40 rounded-full opacity-80"></div>
+        </div>
+      </div>
+
+      <div class="absolute left-6 top-28 flex flex-col gap-4">
+        <div class="map-skeleton__pin"></div>
+        <div class="map-skeleton__pin map-skeleton__pin--delay"></div>
+        <div class="map-skeleton__pin map-skeleton__pin--soft"></div>
+      </div>
+
+      <div class="absolute bottom-6 right-6 w-72 rounded-[1.5rem] border border-white/45 bg-white/76 p-5 shadow-[0_22px_55px_rgba(15,23,42,0.16)] backdrop-blur-xl">
+        <div class="mb-4 flex items-center justify-between">
+          <div class="skeleton h-3.5 w-24 rounded-full"></div>
+          <div class="skeleton h-8 w-8 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div class="rounded-2xl bg-white/70 p-3">
+            <div class="skeleton mb-3 h-8 w-10 rounded-xl"></div>
+            <div class="skeleton h-2.5 w-full rounded-full"></div>
+          </div>
+          <div class="rounded-2xl bg-white/70 p-3">
+            <div class="skeleton mb-3 h-8 w-10 rounded-xl"></div>
+            <div class="skeleton h-2.5 w-full rounded-full"></div>
+          </div>
+          <div class="rounded-2xl bg-white/70 p-3">
+            <div class="skeleton mb-3 h-8 w-10 rounded-xl"></div>
+            <div class="skeleton h-2.5 w-full rounded-full"></div>
+          </div>
+        </div>
+
+        <div class="my-4 h-px bg-slate-200/80"></div>
+
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="skeleton h-6 w-6 rounded-full"></div>
+            <div class="skeleton h-2.5 w-28 rounded-full"></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="skeleton h-6 w-6 rounded-full"></div>
+            <div class="skeleton h-2.5 w-24 rounded-full"></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="skeleton h-6 w-6 rounded-full"></div>
+            <div class="skeleton h-2.5 w-30 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (mapLoaded() && unitsPanelReady() && unitsPanelOpen()) {
+    <aside class="units-panel absolute left-4 top-4 bottom-4 z-10 w-[20rem] max-w-[calc(100%-2rem)] overflow-hidden rounded-[1.5rem] border border-white/45 bg-white/80 shadow-[0_24px_60px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:w-[21.5rem]">
+      <div class="flex items-center justify-between border-b border-slate-200/80 px-4 py-4">
+        <div>
+          <p class="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-slate-500">Despacho</p>
+          <h2 class="mt-1 text-sm font-semibold text-slate-900">Unidades activas</h2>
+        </div>
+
+        <div class="rounded-full bg-slate-900 px-2.5 py-1 text-[0.7rem] font-semibold text-white">
+          {{ displayMarkers().length }}
+        </div>
+      </div>
+
+      <div class="units-panel__list max-h-full space-y-2 overflow-y-auto px-3 py-3">
+        @for (marker of displayMarkers(); track marker.id) {
+          <button
+            type="button"
+            class="units-panel__item w-full rounded-[1.25rem] border px-3 py-3 text-left transition"
+            [class.units-panel__item--selected]="selectedMarkerId() === marker.id"
+            (click)="focusMarker(marker.id, true)"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="h-2.5 w-2.5 rounded-full"
+                    [style.background]="marker.status === 'MOVING' ? '#10b981' : marker.status === 'IDLE' ? '#f59e0b' : '#ef4444'"
+                  ></span>
+                  <p class="truncate text-sm font-semibold text-slate-900">{{ marker.name }}</p>
+                </div>
+                <p class="mt-1 text-xs text-slate-500">{{ marker.id }} · {{ getUnitMetaLabel(marker.type) }}</p>
+              </div>
+
+              <span class="rounded-full px-2.5 py-1 text-[0.68rem] font-semibold ring-1"
+                [class]="getStatusClasses(marker.status)"
+              >
+                {{ getStatusLabel(marker.status) }}
+              </span>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-2 text-[0.72rem] text-slate-500">
+              <div class="rounded-xl bg-slate-50 px-2.5 py-2">
+                <p class="text-[0.62rem] uppercase tracking-[0.16em] text-slate-400">Lat</p>
+                <p class="mt-1 font-medium text-slate-700">{{ marker.location.latitude.toFixed(4) }}</p>
+              </div>
+              <div class="rounded-xl bg-slate-50 px-2.5 py-2">
+                <p class="text-[0.62rem] uppercase tracking-[0.16em] text-slate-400">Lng</p>
+                <p class="mt-1 font-medium text-slate-700">{{ marker.location.longitude.toFixed(4) }}</p>
+              </div>
+            </div>
+          </button>
+        }
+      </div>
+    </aside>
+  }
+
+  <!-- Panel lateral derecho: Leyenda y Estadísticas -->
+  @if (showLegend() && mapLoaded() && legendReady()) {
+    <div
+      class="legend-panel absolute bottom-6 right-6 z-10 w-72 space-y-4 rounded-lg border border-base-300 bg-base-100 p-4 shadow-lg"
+    >
+      <!-- Estadísticas -->
+      <div>
+        <h3 class="mb-3 font-semibold text-sm">Estadísticas</h3>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="rounded-lg bg-success/10 p-2 text-center">
+            <p class="text-2xl font-bold text-success">{{ onlineCount() }}</p>
+            <p class="text-xs opacity-60">En movimiento</p>
+          </div>
+          <div class="rounded-lg bg-warning/10 p-2 text-center">
+            <p class="text-2xl font-bold text-warning">{{ idleCount() }}</p>
+            <p class="text-xs opacity-60">Inactivas</p>
+          </div>
+          <div class="rounded-lg bg-error/10 p-2 text-center">
+            <p class="text-2xl font-bold text-error">{{ offlineCount() }}</p>
+            <p class="text-xs opacity-60">Sin conexión</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leyenda -->
+      <div class="divider my-2"></div>
+      <div>
+        <h3 class="mb-2 font-semibold text-sm">Leyenda</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-success">
+              <svg
+                class="h-3 w-3 text-base-100"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <span class="text-xs">En movimiento</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-warning">
+              <svg
+                class="h-3 w-3 text-base-100"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M4 4a2 2 0 012-2h4a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm4 0a2 2 0 012-2h4a2 2 0 012 2v12a2 2 0 01-2 2h-4a2 2 0 01-2-2V4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <span class="text-xs">Inactiva</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-error">
+              <svg
+                class="h-3 w-3 text-base-100"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <span class="text-xs">Sin conexión</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Botón toggle leyenda (esquina inferior derecha) -->
+  @if (mapLoaded() && legendReady()) {
+    <button
+      (click)="showLegend.set(!showLegend())"
+      class="absolute bottom-6 right-80 z-10 btn btn-circle btn-primary btn-sm shadow-lg"
+      title="Alternar leyenda"
+      aria-label="Alternar leyenda"
+    >
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+        />
+      </svg>
+    </button>
+  }
+
+  @if (mapLoaded() && unitsPanelReady()) {
+    <button
+      type="button"
+      class="absolute left-4 bottom-4 z-10 btn btn-circle btn-neutral btn-sm shadow-lg"
+      (click)="toggleUnitsPanel()"
+      [attr.aria-label]="unitsPanelOpen() ? 'Ocultar listado de unidades' : 'Mostrar listado de unidades'"
+      [title]="unitsPanelOpen() ? 'Ocultar unidades' : 'Mostrar unidades'"
+    >
+      <svg
+        class="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        @if (unitsPanelOpen()) {
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          />
+        } @else {
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          />
+        }
+      </svg>
+    </button>
+  }
+
+</div>

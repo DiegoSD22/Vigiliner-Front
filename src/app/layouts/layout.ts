@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { MapComponent } from "../modules/dashboard/map/map";
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
-  imports: [MapComponent],
+  imports: [RouterOutlet],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })

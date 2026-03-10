@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+
 import { tap, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { ApiResponse } from '../../../core/interfaces/api-response.interface';
-import { LoginResponseDto, LoginResultDto, RegisterRequestDto } from '../../../shared/dtos/auth';
-import { StorageService } from '../../../shared/services/storage.service';
+
+import { environment } from '@vigiliner/env/environment';
+import { ApiResponse } from '@vigiliner/core/interfaces/api-response.interface';
+import { LoginResponseDto, LoginResultDto, RegisterRequestDto } from '@vigiliner/shared/dtos/auth';
+import { StorageService } from '@vigiliner/shared/services/storage.service';
 
 /**
  * Servicio de autenticación

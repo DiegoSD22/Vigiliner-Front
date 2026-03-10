@@ -33,6 +33,8 @@
     "@angular/router": "^21.1.0",
     "leaflet": "^1.9.4",
     "leaflet-rotatedmarker": "^0.2.0",
+    "mapbox-gl": "^3.19.1",
+    "ngx-mapbox-gl": "^14.0.0",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.3",
     "tslib": "^2.3.0"
@@ -44,6 +46,7 @@
     "@angular/material": "^21.1.5",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/leaflet": "^1.9.21",
+    "@types/mapbox-gl": "^3.4.1",
     "daisyui": "^5.5.19",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.3",

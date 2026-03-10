@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { NonNullableFormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+
 import { Auth } from '../../services/auth';
 
 @Component({

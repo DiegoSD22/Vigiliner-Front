@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+:host ::ng-deep app-admin-unit-map {
+  display: block;
+  height: 100%;
+  width: 100%;
+}

@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  API_URL: 'https://api.vigiliner.com/api' // Cambia esto según tu backend en producción
+  API_URL: 'https://api.vigiliner.com/api',
+  MAPBOX_API_KEY: ''
 };

@@ -1,0 +1,275 @@
+<main class="units-page min-h-full bg-base-200 text-base-content">
+  <section class="mx-auto flex w-full max-w-7xl flex-col gap-6 p-6">
+    <header class="grid gap-4 rounded-[2rem] border border-base-300 bg-base-100 p-6 shadow-sm lg:grid-cols-[1.3fr_0.7fr]">
+      <div>
+        <p class="badge badge-primary badge-outline">Modulo de Unidades</p>
+        <h1 class="mt-4 text-3xl font-bold tracking-tight">CRUD de unidades listo para conectar</h1>
+        <p class="mt-3 max-w-2xl text-sm leading-6 opacity-75">
+          Esta vista ya define el flujo operativo: crear, editar, duplicar y retirar unidades con datos mock.
+          Cuando conectemos el backend, solo cambiamos la fuente de datos y conservamos la experiencia.
+        </p>
+      </div>
+
+      <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+        <article class="rounded-2xl bg-primary/8 p-4">
+          <p class="text-xs uppercase tracking-[0.22em] text-primary/70">Total</p>
+          <p class="mt-3 text-3xl font-bold text-primary">{{ totalUnits() }}</p>
+          <p class="mt-2 text-xs opacity-65">Registradas en la flota</p>
+        </article>
+        <article class="rounded-2xl bg-success/10 p-4">
+          <p class="text-xs uppercase tracking-[0.22em] text-success/75">Activas</p>
+          <p class="mt-3 text-3xl font-bold text-success">{{ activeUnits() }}</p>
+          <p class="mt-2 text-xs opacity-65">Con disponibilidad inmediata</p>
+        </article>
+        <article class="rounded-2xl bg-warning/12 p-4">
+          <p class="text-xs uppercase tracking-[0.22em] text-warning/75">Atencion</p>
+          <p class="mt-3 text-3xl font-bold text-warning">{{ attentionUnits() }}</p>
+          <p class="mt-2 text-xs opacity-65">Offline o en mantenimiento</p>
+        </article>
+      </div>
+    </header>
+
+    <section class="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+      <div class="space-y-4 rounded-[2rem] border border-base-300 bg-base-100 p-5 shadow-sm">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 class="text-xl font-semibold">Listado de unidades</h2>
+            <p class="mt-1 text-sm opacity-70">Filtra, inspecciona y prepara las operaciones CRUD antes de integrar API.</p>
+          </div>
+
+          <button type="button" class="btn btn-primary" (click)="openCreateDrawer()">
+            Nueva unidad
+          </button>
+        </div>
+
+        <div class="grid gap-3 lg:grid-cols-[1fr_auto]">
+          <label class="input input-bordered flex items-center gap-2">
+            <svg class="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+            </svg>
+            <input
+              #searchInput
+              type="text"
+              class="grow"
+              placeholder="Buscar por nombre, ID, placa o marca"
+              [value]="searchTerm()"
+              (input)="setSearchTerm(searchInput.value)"
+            />
+          </label>
+
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="btn btn-sm" [class.btn-neutral]="statusFilter() === 'ALL'" (click)="setStatusFilter('ALL')">Todas</button>
+            <button type="button" class="btn btn-sm" [class.btn-success]="statusFilter() === 'ACTIVE'" (click)="setStatusFilter('ACTIVE')">Activas</button>
+            <button type="button" class="btn btn-sm" [class.btn-warning]="statusFilter() === 'IDLE'" (click)="setStatusFilter('IDLE')">En espera</button>
+            <button type="button" class="btn btn-sm" [class.btn-error]="statusFilter() === 'OFFLINE'" (click)="setStatusFilter('OFFLINE')">Offline</button>
+            <button type="button" class="btn btn-sm" [class.btn-info]="statusFilter() === 'MAINTENANCE'" (click)="setStatusFilter('MAINTENANCE')">Mantenimiento</button>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-[1.5rem] border border-base-300">
+          <div class="overflow-x-auto">
+            <table class="table table-zebra units-table">
+              <thead>
+                <tr>
+                  <th>Unidad</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                  <th>Placa</th>
+                  <th>Dispositivo</th>
+                  <th class="text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (unit of filteredUnits(); track unit.id) {
+                  <tr [class.bg-primary/5]="highlightedUnitId() === unit.id">
+                    <td>
+                      <button type="button" class="w-full text-left" (click)="selectUnit(unit.id)">
+                        <div class="font-semibold">{{ unit.name }}</div>
+                        <div class="text-xs opacity-60">{{ unit.id }} · {{ unit.brand }} {{ unit.model }}</div>
+                      </button>
+                    </td>
+                    <td>
+                      <span class="badge badge-ghost">{{ unit.type }}</span>
+                    </td>
+                    <td>
+                      <span class="badge" [class]="getStatusBadge(unit.status)">
+                        {{ getStatusLabel(unit.status) }}
+                      </span>
+                    </td>
+                    <td>{{ unit.license_plate }}</td>
+                    <td>{{ unit.deviceId || 'Sin asignar' }}</td>
+                    <td>
+                      <div class="flex justify-end gap-2">
+                        <button type="button" class="btn btn-ghost btn-xs" (click)="openEditDrawer(unit)">Editar</button>
+                        <button type="button" class="btn btn-ghost btn-xs" (click)="duplicateUnit(unit)">Duplicar</button>
+                        <button type="button" class="btn btn-ghost btn-xs text-error" (click)="deleteUnit(unit.id)">Eliminar</button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="py-10 text-center">
+                      <div class="mx-auto max-w-sm">
+                        <p class="text-base font-semibold">No hay unidades que coincidan con los filtros.</p>
+                        <p class="mt-2 text-sm opacity-70">Prueba otro estado o registra una nueva unidad mock para continuar el flujo.</p>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <aside class="space-y-4">
+        <section class="rounded-[2rem] border border-base-300 bg-base-100 p-5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] opacity-55">Contexto</p>
+              <h2 class="mt-1 text-lg font-semibold">Detalle rapido</h2>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" (click)="openCreateDrawer()">Crear</button>
+          </div>
+
+          @if (selectedUnit(); as unit) {
+            <div class="mt-5 space-y-4">
+              <div class="rounded-[1.5rem] bg-base-200 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-lg font-semibold">{{ unit.name }}</p>
+                    <p class="text-sm opacity-65">{{ unit.id }}</p>
+                  </div>
+                  <span class="badge" [class]="getStatusBadge(unit.status)">
+                    {{ getStatusLabel(unit.status) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="rounded-2xl border border-base-300 p-4">
+                  <p class="text-xs uppercase tracking-[0.16em] opacity-50">Vehiculo</p>
+                  <p class="mt-2 font-semibold">{{ unit.brand }} {{ unit.model }}</p>
+                  <p class="text-sm opacity-65">{{ unit.type }} · {{ unit.year }}</p>
+                </div>
+                <div class="rounded-2xl border border-base-300 p-4">
+                  <p class="text-xs uppercase tracking-[0.16em] opacity-50">Identificadores</p>
+                  <p class="mt-2 font-semibold">{{ unit.license_plate }}</p>
+                  <p class="text-sm opacity-65">{{ unit.serial_number }}</p>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-dashed border-base-300 p-4 text-sm opacity-75">
+                Este bloque puede evolucionar luego a historial, auditoria, telemetria o asignacion de operador.
+              </div>
+            </div>
+          } @else {
+            <div class="mt-5 rounded-2xl border border-dashed border-base-300 p-5 text-sm opacity-70">
+              Selecciona una unidad de la tabla para ver el detalle rapido.
+            </div>
+          }
+        </section>
+
+        <section class="rounded-[2rem] border border-base-300 bg-base-100 p-5 shadow-sm">
+          <p class="text-xs uppercase tracking-[0.2em] opacity-55">Roadmap</p>
+          <ul class="mt-4 space-y-3 text-sm opacity-80">
+            <li>Conectar listado y acciones con `UnitsService`.</li>
+            <li>Reemplazar borrado mock por dialogo de confirmacion.</li>
+            <li>Agregar paginacion, filtros avanzados y permisos.</li>
+          </ul>
+        </section>
+      </aside>
+    </section>
+  </section>
+
+  @if (drawerOpen()) {
+    <div class="fixed inset-0 z-50 bg-slate-950/30 backdrop-blur-[2px]" (click)="closeDrawer()"></div>
+    <aside class="units-drawer fixed inset-y-0 right-0 z-[60] w-full max-w-xl border-l border-base-300 bg-base-100 shadow-2xl">
+      <div class="flex h-full flex-col">
+        <header class="border-b border-base-300 px-6 py-5">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] opacity-55">{{ drawerMode() === 'create' ? 'Nueva unidad' : 'Editar unidad' }}</p>
+              <h2 class="mt-1 text-2xl font-semibold">
+                {{ drawerMode() === 'create' ? 'Crear unidad mock' : 'Actualizar unidad mock' }}
+              </h2>
+            </div>
+            <button type="button" class="btn btn-circle btn-ghost btn-sm" (click)="closeDrawer()" aria-label="Cerrar formulario">
+              ✕
+            </button>
+          </div>
+        </header>
+
+        <form class="flex flex-1 flex-col overflow-hidden" [formGroup]="unitForm" (ngSubmit)="saveUnit()">
+          <div class="grid flex-1 gap-4 overflow-y-auto px-6 py-6 md:grid-cols-2">
+            <label class="form-control md:col-span-2">
+              <span class="label-text mb-2 font-medium">Nombre operacional</span>
+              <input type="text" class="input input-bordered" formControlName="name" placeholder="Unidad Norte 09" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Tipo</span>
+              <select class="select select-bordered" formControlName="type">
+                <option value="TRUCK">Truck</option>
+                <option value="VAN">Van</option>
+                <option value="CAR">Car</option>
+              </select>
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Estado</span>
+              <select class="select select-bordered" formControlName="status">
+                <option value="ACTIVE">Activa</option>
+                <option value="IDLE">En espera</option>
+                <option value="OFFLINE">Offline</option>
+                <option value="MAINTENANCE">Mantenimiento</option>
+              </select>
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Marca</span>
+              <input type="text" class="input input-bordered" formControlName="brand" placeholder="Mercedes-Benz" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Modelo</span>
+              <input type="text" class="input input-bordered" formControlName="model" placeholder="Sprinter 315" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Ano</span>
+              <input type="number" class="input input-bordered" formControlName="year" placeholder="2024" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Placa</span>
+              <input type="text" class="input input-bordered" formControlName="license_plate" placeholder="VGI-901" />
+            </label>
+
+            <label class="form-control md:col-span-2">
+              <span class="label-text mb-2 font-medium">Serial del vehiculo</span>
+              <input type="text" class="input input-bordered" formControlName="serial_number" placeholder="MB-2401-ABC" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Dispositivo GPS</span>
+              <input type="text" class="input input-bordered" formControlName="deviceId" placeholder="GPS-099" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Operador asignado</span>
+              <input type="text" class="input input-bordered" formControlName="userId" placeholder="USR-24" />
+            </label>
+          </div>
+
+          <footer class="flex items-center justify-end gap-3 border-t border-base-300 px-6 py-5">
+            <button type="button" class="btn btn-ghost" (click)="closeDrawer()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              {{ drawerMode() === 'create' ? 'Crear unidad' : 'Guardar cambios' }}
+            </button>
+          </footer>
+        </form>
+      </div>
+    </aside>
+  }
+</main>

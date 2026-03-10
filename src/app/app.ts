@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Tracking } from './core/tracking';
-import { UnitsService } from './modules/dashboard/units/services/units.service';
+import { Tracking } from '@vigiliner/core/tracking';
+import { UnitsService } from '@vigiliner/dashboard-modules/units/services/units.service';
 
 @Component({
   selector: 'app-root',

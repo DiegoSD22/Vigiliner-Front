@@ -13,7 +13,17 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+    "baseUrl": "./src",
+    "paths": {
+      "@vigiliner/*": ["app/*"],
+      "@vigiliner/core/*": ["app/core/*"],
+      "@vigiliner/shared/*": ["app/shared/*"],
+      "@vigiliner/env/*": ["environments/*"],
+      "@vigiliner/dashboard/*": ["app/modules/dashboard/*"],
+      "@vigiliner/dashboard-modules/*": ["app/modules/dashboard/modules/*"],
+      "@vigiliner/auth/*": ["app/modules/auth/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
