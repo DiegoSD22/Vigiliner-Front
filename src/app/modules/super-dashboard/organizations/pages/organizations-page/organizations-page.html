@@ -1,0 +1,150 @@
+<section class="space-y-5">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 class="text-2xl font-bold">Empresas</h2>
+      <p class="opacity-75">Gestiona las empresas cliente del sistema SaaS multi-tenant.</p>
+    </div>
+    <button class="btn btn-primary btn-sm" type="button" (click)="openCreate()">Nueva organización</button>
+  </header>
+
+  @if (successMessage()) {
+    <div class="alert alert-success" role="alert" aria-live="polite">
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error" role="alert" aria-live="polite">
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <label class="form-control w-full sm:col-span-2">
+      <span class="label-text mb-1 text-sm">Buscar</span>
+      <input
+        type="text"
+        class="input input-bordered w-full bg-base-100"
+        placeholder="Buscar por nombre o UUID..."
+        [value]="searchTerm()"
+        (input)="setSearchTerm($any($event.target).value)"
+      />
+    </label>
+
+    <label class="form-control w-full">
+      <span class="label-text mb-1 text-sm">Estado</span>
+      <select
+        class="select select-bordered w-full bg-base-100"
+        [value]="statusFilter()"
+        (change)="setStatusFilter($any($event.target).value)"
+      >
+        <option value="ALL">Todos</option>
+        <option value="ACTIVE">Activa</option>
+        <option value="SUSPENDED">Suspendida</option>
+        <option value="ARCHIVED">Archivada</option>
+      </select>
+    </label>
+
+    <div class="flex items-end">
+      <button type="button" class="btn btn-ghost w-full" (click)="loadOrganizations()">Recargar</button>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto rounded-2xl border border-base-300 bg-base-100">
+    <table class="table table-zebra">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Usuarios</th>
+          <th>Estado</th>
+          <th>Creada</th>
+          <th class="text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (isLoading()) {
+          <tr>
+            <td colspan="5" class="py-8 text-center">
+              <span class="loading loading-spinner loading-md"></span>
+            </td>
+          </tr>
+        } @else {
+          @for (organization of filteredOrganizations(); track trackByOrganizationId($index, organization)) {
+            <tr>
+              <td class="font-semibold">{{ organization.name }}</td>
+              <td>{{ organization._count?.users ?? 0 }}</td>
+              <td>
+                <span [class]="badgeClass(organization.status)">{{ statusLabel(organization.status) }}</span>
+              </td>
+              <td>{{ organization.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <div class="flex justify-end gap-2">
+                  <button type="button" class="btn btn-ghost btn-xs" (click)="openEdit(organization)">Editar</button>
+                  <button type="button" class="btn btn-error btn-soft btn-xs" (click)="archiveOrganization(organization)">Archivar</button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="py-10 text-center text-sm opacity-70">
+                No hay organizaciones para mostrar.
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (formOpen()) {
+    <div class="fixed inset-0 z-50 grid place-items-center bg-black/45 px-4" role="dialog" aria-modal="true" aria-label="Formulario de empresa">
+      <section class="w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 p-6 shadow-2xl">
+        <header class="mb-5 flex items-start justify-between gap-3">
+          <div>
+            <h3 class="text-xl font-bold">{{ formMode() === 'create' ? 'Nueva Empresa' : 'Editar Empresa' }}</h3>
+            <p class="text-sm opacity-75">Completa la información base de la empresa.</p>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="closeForm()">Cerrar</button>
+        </header>
+
+        <form [formGroup]="organizationForm" (ngSubmit)="saveOrganization()" class="space-y-4" novalidate>
+          <label class="form-control w-full">
+            <span class="label-text mb-2 text-sm">Nombre</span>
+            <input
+              type="text"
+              formControlName="name"
+              class="input input-bordered w-full"
+              placeholder="Transportes Andina S.A.S."
+              [class.input-error]="organizationForm.controls.name.invalid && organizationForm.controls.name.touched"
+            />
+            @if (organizationForm.controls.name.touched && organizationForm.controls.name.errors?.['required']) {
+              <span class="label-text-alt mt-2 text-error">El nombre es obligatorio.</span>
+            }
+            @if (organizationForm.controls.name.touched && organizationForm.controls.name.errors?.['minlength']) {
+              <span class="label-text-alt mt-2 text-error">El nombre debe tener al menos 2 caracteres.</span>
+            }
+          </label>
+
+          <label class="form-control w-full">
+            <span class="label-text mb-2 text-sm">Estado</span>
+            <select formControlName="status" class="select select-bordered w-full">
+              <option value="ACTIVE">Activa</option>
+              <option value="SUSPENDED">Suspendida</option>
+              <option value="ARCHIVED">Archivada</option>
+            </select>
+          </label>
+
+          <div class="mt-2 flex justify-end gap-3">
+            <button type="button" class="btn btn-ghost" (click)="closeForm()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+              @if (isSubmitting()) {
+                <span class="loading loading-spinner loading-sm"></span>
+              }
+              {{ isSubmitting() ? 'Guardando...' : formMode() === 'create' ? 'Crear organización' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</section>

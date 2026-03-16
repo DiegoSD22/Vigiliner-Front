@@ -18,8 +18,8 @@ export const superDashboardRoutes: Routes = [
       {
         path: 'empresas',
         loadComponent: () =>
-          import('./pages/super-companies-page/super-companies-page').then(
-            (m) => m.SuperCompaniesPage
+          import('./organizations/pages/organizations-page/organizations-page').then(
+            (m) => m.OrganizationsPage
           ),
       },
       {
