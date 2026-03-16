@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { ConfirmDialogComponent } from '@vigiliner/shared/design-system/confirm-dialog/confirm-dialog.component';
+
 import { UnitDto } from '../../interfaces/units.dtos';
 
 @Component({
   selector: 'list-all-units-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent],
   templateUrl: './list-all-units-page.component.html',
   styleUrl: './list-all-units-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -103,6 +105,7 @@ export class ListAllUnitsPageComponent {
   readonly drawerMode = signal<'create' | 'edit'>('create');
   readonly selectedUnitId = signal<string | null>(null);
   readonly highlightedUnitId = signal<string | null>(this.initialUnits[0]?.id ?? null);
+  readonly deleteCandidate = signal<UnitDto | null>(null);
 
   readonly filteredUnits = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -269,7 +272,21 @@ export class ListAllUnitsPageComponent {
     this.selectedUnitId.set(duplicated.id);
   }
 
-  deleteUnit(unitId: string): void {
+  requestDeleteUnit(unit: UnitDto): void {
+    this.deleteCandidate.set(unit);
+  }
+
+  closeDeleteDialog(): void {
+    this.deleteCandidate.set(null);
+  }
+
+  confirmDeleteUnit(): void {
+    const unitId = this.deleteCandidate()?.id;
+
+    if (!unitId) {
+      return;
+    }
+
     this.units.update((current) => current.filter((unit) => unit.id !== unitId));
     const fallbackUnitId = this.units()[0]?.id ?? null;
 
@@ -281,6 +298,8 @@ export class ListAllUnitsPageComponent {
       this.selectedUnitId.set(fallbackUnitId);
       this.closeDrawer();
     }
+
+    this.deleteCandidate.set(null);
   }
 
   getStatusLabel(status: string | undefined): string {
