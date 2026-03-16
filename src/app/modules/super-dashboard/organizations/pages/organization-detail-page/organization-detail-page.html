@@ -1,0 +1,227 @@
+<section class="space-y-6">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <a class="btn btn-ghost btn-sm -ml-3" routerLink="/super-dashboard/empresas">Volver a empresas</a>
+      <h1 class="mt-2 text-3xl font-bold">Detalle de empresa</h1>
+      <p class="mt-2 text-sm opacity-75">Consulta el estado de la organización y administra sus usuarios administradores.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openCreateAdmin()">Asociar administrador</button>
+  </div>
+
+  @if (successMessage()) {
+    <div class="alert alert-success" role="alert" aria-live="polite">
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error" role="alert" aria-live="polite">
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="grid min-h-72 place-items-center rounded-4xl border border-base-300 bg-base-100">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (organization(); as organization) {
+    <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <article class="rounded-4xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[0.22em] opacity-55">Empresa</p>
+            <h2 class="mt-3 text-3xl font-bold">{{ organization.name }}</h2>
+            <p class="mt-2 font-mono text-xs opacity-60">{{ organization.id }}</p>
+          </div>
+          <span [class]="organizationStatusClass(organization.status)">{{ organizationStatusLabel(organization.status) }}</span>
+        </div>
+
+        <div class="mt-8 grid gap-4 sm:grid-cols-3">
+          <div class="rounded-3xl bg-primary/8 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-primary/70">Usuarios</p>
+            <p class="mt-2 text-3xl font-bold text-primary">{{ organization._count?.users ?? 0 }}</p>
+            <p class="mt-2 text-xs opacity-70">Usuarios totales vinculados</p>
+          </div>
+          <div class="rounded-3xl bg-secondary/10 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-secondary/70">Roles</p>
+            <p class="mt-2 text-3xl font-bold text-secondary">{{ organization._count?.roles ?? 0 }}</p>
+            <p class="mt-2 text-xs opacity-70">Roles configurados en la empresa</p>
+          </div>
+          <div class="rounded-3xl bg-accent/10 p-4">
+            <p class="text-xs uppercase tracking-[0.18em] text-accent/70">Actualización</p>
+            <p class="mt-2 text-lg font-bold text-accent">{{ organization.updatedAt | date: 'dd/MM/yyyy' }}</p>
+            <p class="mt-2 text-xs opacity-70">Último cambio registrado</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-4xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <p class="text-xs uppercase tracking-[0.22em] opacity-55">Planeación</p>
+        <h2 class="mt-3 text-xl font-semibold">Próximos pasos para esta empresa</h2>
+        <ul class="mt-5 space-y-3 text-sm opacity-80">
+          <li>Conectar el CRUD de administradores a endpoints reales por organización.</li>
+          <li>Permitir asignar roles administrativos específicos además del rol base.</li>
+          <li>Agregar auditoría de invitaciones, aceptación y suspensión.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="rounded-4xl border border-base-300 bg-base-100 p-6 shadow-sm">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] opacity-55">Administradores</p>
+          <h2 class="mt-2 text-2xl font-bold">Usuarios asociados</h2>
+          <p class="mt-2 text-sm opacity-75">Maqueta operativa para crear, editar y retirar administradores de la empresa.</p>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-3">
+          <article class="rounded-2xl bg-base-200 px-4 py-3 text-center">
+            <p class="text-xs uppercase tracking-[0.18em] opacity-55">Total</p>
+            <p class="mt-2 text-2xl font-bold">{{ admins().length }}</p>
+          </article>
+          <article class="rounded-2xl bg-success/10 px-4 py-3 text-center">
+            <p class="text-xs uppercase tracking-[0.18em] text-success/75">Activos</p>
+            <p class="mt-2 text-2xl font-bold text-success">{{ activeAdmins() }}</p>
+          </article>
+          <article class="rounded-2xl bg-info/10 px-4 py-3 text-center">
+            <p class="text-xs uppercase tracking-[0.18em] text-info/75">Invitados</p>
+            <p class="mt-2 text-2xl font-bold text-info">{{ invitedAdmins() }}</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-3 lg:grid-cols-[1fr_auto]">
+        <label class="input input-bordered flex items-center gap-2">
+          <svg class="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+          </svg>
+          <input #searchInput type="text" class="grow" placeholder="Buscar administrador por nombre o email" [value]="adminSearchTerm()" (input)="setAdminSearchTerm(searchInput.value)" />
+        </label>
+
+        <button type="button" class="btn btn-primary" (click)="openCreateAdmin()">Nuevo administrador</button>
+      </div>
+
+      <div class="mt-6 overflow-hidden rounded-3xl border border-base-300">
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Administrador</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Último acceso</th>
+                <th class="text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (admin of filteredAdmins(); track trackByAdminId($index, admin)) {
+                <tr>
+                  <td>
+                    <div class="font-semibold">{{ admin.name }}</div>
+                    <div class="text-sm opacity-65">{{ admin.email }}</div>
+                  </td>
+                  <td><span class="badge badge-ghost badge-sm">{{ admin.role === 'OWNER' ? 'Owner' : 'Admin' }}</span></td>
+                  <td><span [class]="adminStatusClass(admin.status)">{{ adminStatusLabel(admin.status) }}</span></td>
+                  <td>{{ admin.lastAccessAt ? (admin.lastAccessAt | date: 'dd/MM/yyyy HH:mm') : 'Sin acceso aún' }}</td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <button type="button" class="btn btn-ghost btn-xs" (click)="openEditAdmin(admin)">Editar</button>
+                      <button type="button" class="btn btn-ghost btn-xs text-error" (click)="requestDeleteAdmin(admin)">Retirar</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="py-10 text-center text-sm opacity-70">No hay administradores asociados para esta empresa.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <div class="rounded-4xl border border-base-300 bg-base-100 p-8 text-center text-sm opacity-70">
+      No se encontró información para esta empresa.
+    </div>
+  }
+
+  <app-confirm-dialog
+    [open]="!!deleteCandidate()"
+    title="Retirar administrador"
+    ariaLabel="Confirmar retiro de administrador"
+    [message]="'Vas a retirar a ' + (deleteCandidate()?.name ?? 'este administrador') + ' de la empresa. Podrás volver a asociarlo más adelante.'"
+    confirmLabel="Sí, retirar"
+    cancelLabel="Cancelar"
+    confirmButtonClass="btn btn-error"
+    (confirmed)="confirmDeleteAdmin()"
+    (cancelled)="closeDeleteDialog()"
+  />
+
+  @if (drawerOpen()) {
+    <div class="fixed inset-0 z-50 bg-slate-950/30 backdrop-blur-[2px]" (click)="closeAdminDrawer()"></div>
+    <aside class="fixed inset-y-0 right-0 z-60 w-full max-w-xl border-l border-base-300 bg-base-100 shadow-2xl">
+      <div class="flex h-full flex-col">
+        <header class="border-b border-base-300 px-6 py-5">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] opacity-55">{{ drawerMode() === 'create' ? 'Nuevo administrador' : 'Editar administrador' }}</p>
+              <h2 class="mt-1 text-2xl font-semibold">{{ drawerMode() === 'create' ? 'Asociar usuario administrador' : 'Actualizar usuario administrador' }}</h2>
+            </div>
+            <button type="button" class="btn btn-circle btn-ghost btn-sm" (click)="closeAdminDrawer()" aria-label="Cerrar formulario">✕</button>
+          </div>
+        </header>
+
+        <form class="flex flex-1 flex-col overflow-hidden" [formGroup]="adminForm" (ngSubmit)="saveAdmin()">
+          <div class="grid flex-1 gap-4 overflow-y-auto px-6 py-6 md:grid-cols-2">
+            <label class="form-control md:col-span-2">
+              <span class="label-text mb-2 font-medium">Nombre completo</span>
+              <input type="text" class="input input-bordered" formControlName="name" placeholder="Laura Mendoza" />
+              @if (adminForm.controls.name.touched && adminForm.controls.name.errors?.['required']) {
+                <span class="label-text-alt mt-2 text-error">El nombre es obligatorio.</span>
+              }
+            </label>
+
+            <label class="form-control md:col-span-2">
+              <span class="label-text mb-2 font-medium">Correo</span>
+              <input type="email" class="input input-bordered" formControlName="email" placeholder="admin@empresa.com" />
+              @if (adminForm.controls.email.touched && adminForm.controls.email.errors?.['required']) {
+                <span class="label-text-alt mt-2 text-error">El correo es obligatorio.</span>
+              }
+              @if (adminForm.controls.email.touched && adminForm.controls.email.errors?.['email']) {
+                <span class="label-text-alt mt-2 text-error">Ingresa un correo válido.</span>
+              }
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Rol</span>
+              <select class="select select-bordered" formControlName="role">
+                <option value="OWNER">Owner</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </label>
+
+            <label class="form-control">
+              <span class="label-text mb-2 font-medium">Estado</span>
+              <select class="select select-bordered" formControlName="status">
+                <option value="INVITED">Invitado</option>
+                <option value="ACTIVE">Activo</option>
+                <option value="SUSPENDED">Suspendido</option>
+              </select>
+            </label>
+          </div>
+
+          <footer class="flex items-center justify-end gap-3 border-t border-base-300 px-6 py-5">
+            <button type="button" class="btn btn-ghost" (click)="closeAdminDrawer()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSavingAdmin()">
+              @if (isSavingAdmin()) {
+                <span class="loading loading-spinner loading-sm"></span>
+              }
+              {{ isSavingAdmin() ? 'Guardando...' : drawerMode() === 'create' ? 'Asociar administrador' : 'Guardar cambios' }}
+            </button>
+          </footer>
+        </form>
+      </div>
+    </aside>
+  }
+</section>

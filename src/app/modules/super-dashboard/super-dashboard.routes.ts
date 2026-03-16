@@ -23,6 +23,13 @@ export const superDashboardRoutes: Routes = [
           ),
       },
       {
+        path: 'empresas/:id',
+        loadComponent: () =>
+          import('./organizations/pages/organization-detail-page/organization-detail-page').then(
+            (m) => m.OrganizationDetailPage
+          ),
+      },
+      {
         path: 'unidades',
         loadComponent: () =>
           import('./pages/super-units-page/super-units-page').then(

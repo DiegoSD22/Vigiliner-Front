@@ -71,7 +71,9 @@
         } @else {
           @for (organization of filteredOrganizations(); track trackByOrganizationId($index, organization)) {
             <tr>
-              <td class="font-semibold">{{ organization.name }}</td>
+              <td>
+                <a class="font-semibold link-hover" [routerLink]="['/super-dashboard/empresas', organization.id]">{{ organization.name }}</a>
+              </td>
               <td>{{ organization._count?.users ?? 0 }}</td>
               <td>
                 <span [class]="badgeClass(organization.status)">{{ statusLabel(organization.status) }}</span>
@@ -79,6 +81,7 @@
               <td>{{ organization.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
               <td>
                 <div class="flex justify-end gap-2">
+                  <a class="btn btn-ghost btn-xs" [routerLink]="['/super-dashboard/empresas', organization.id]">Detalle</a>
                   <button type="button" class="btn btn-ghost btn-xs" (click)="openEdit(organization)">Editar</button>
                   <button type="button" class="btn btn-error btn-soft btn-xs" (click)="requestArchive(organization)">Archivar</button>
                 </div>

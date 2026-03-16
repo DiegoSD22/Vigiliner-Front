@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 import { finalize } from 'rxjs';
 
@@ -16,7 +17,7 @@ import { ConfirmDialogComponent } from '@vigiliner/shared/design-system/confirm-
 
 @Component({
   selector: 'app-organizations-page',
-  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ConfirmDialogComponent],
   templateUrl: './organizations-page.html',
   styleUrl: './organizations-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
