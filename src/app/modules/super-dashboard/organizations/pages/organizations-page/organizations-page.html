@@ -80,7 +80,7 @@
               <td>
                 <div class="flex justify-end gap-2">
                   <button type="button" class="btn btn-ghost btn-xs" (click)="openEdit(organization)">Editar</button>
-                  <button type="button" class="btn btn-error btn-soft btn-xs" (click)="archiveOrganization(organization)">Archivar</button>
+                  <button type="button" class="btn btn-error btn-soft btn-xs" (click)="requestArchive(organization)">Archivar</button>
                 </div>
               </td>
             </tr>
@@ -147,4 +147,17 @@
       </section>
     </div>
   }
+
+  <app-confirm-dialog
+    [open]="!!archiveCandidate()"
+    [busy]="isArchiving()"
+    ariaLabel="Confirmar archivado de empresa"
+    title="Archivar empresa"
+    [message]="'Vas a archivar ' + (archiveCandidate()?.name ?? 'esta empresa') + '. Esta acción la ocultará del listado activo.'"
+    confirmLabel="Sí, archivar"
+    cancelLabel="Cancelar"
+    confirmButtonClass="btn btn-error"
+    (confirmed)="confirmArchive()"
+    (cancelled)="closeArchiveDialog()"
+  />
 </section>

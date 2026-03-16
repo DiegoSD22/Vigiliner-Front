@@ -12,10 +12,11 @@ import {
   UpdateOrganizationDto,
 } from '../../interfaces/organizations.dto';
 import { OrganizationsService } from '../../services/organizations.service';
+import { ConfirmDialogComponent } from '@vigiliner/shared/design-system/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-organizations-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent],
   templateUrl: './organizations-page.html',
   styleUrl: './organizations-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +27,7 @@ export class OrganizationsPage {
 
   readonly isLoading = signal(false);
   readonly isSubmitting = signal(false);
+  readonly isArchiving = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
@@ -37,6 +39,7 @@ export class OrganizationsPage {
   readonly formOpen = signal(false);
   readonly formMode = signal<'create' | 'edit'>('create');
   readonly selectedOrganizationId = signal<string | null>(null);
+  readonly archiveCandidate = signal<OrganizationDto | null>(null);
 
   readonly organizationForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
@@ -132,25 +135,42 @@ export class OrganizationsPage {
     this.updateOrganization(organizationId, payload);
   }
 
-  archiveOrganization(organization: OrganizationDto): void {
-    const confirmArchive = window.confirm(`¿Deseas archivar la organización ${organization.name}?`);
+  requestArchive(organization: OrganizationDto): void {
+    this.archiveCandidate.set(organization);
+  }
 
-    if (!confirmArchive) {
+  closeArchiveDialog(): void {
+    if (this.isArchiving()) {
+      return;
+    }
+
+    this.archiveCandidate.set(null);
+  }
+
+  confirmArchive(): void {
+    const organization = this.archiveCandidate();
+
+    if (!organization) {
       return;
     }
 
     this.errorMessage.set(null);
     this.successMessage.set(null);
+    this.isArchiving.set(true);
 
-    this.organizationsService.remove(organization.id).subscribe({
-      next: () => {
-        this.organizations.update((current) => current.filter((item) => item.id !== organization.id));
-        this.successMessage.set('Organización archivada exitosamente.');
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage.set(this.extractErrorMessage(error, 'No fue posible archivar la organización.'));
-      },
-    });
+    this.organizationsService
+      .remove(organization.id)
+      .pipe(finalize(() => this.isArchiving.set(false)))
+      .subscribe({
+        next: () => {
+          this.organizations.update((current) => current.filter((item) => item.id !== organization.id));
+          this.successMessage.set('Organización archivada exitosamente.');
+          this.archiveCandidate.set(null);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage.set(this.extractErrorMessage(error, 'No fue posible archivar la organización.'));
+        },
+      });
   }
 
   setSearchTerm(value: string): void {
