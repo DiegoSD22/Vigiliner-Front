@@ -28,10 +28,6 @@ export const authRoutes: Routes = [
         loadComponent: () => import('./pages/verify-email-page/verify-email-page').then((m) => m.VerifyEmailPage)
     },
     {
-        path: 'resend-verification',
-        loadComponent: () => import('./pages/resend-verification-page/resend-verification-page').then((m) => m.ResendVerificationPage)
-    },
-    {
         path: 'change-password',
         canActivate: [authGuard],
         loadComponent: () => import('./pages/change-password-page/change-password-page').then((m) => m.ChangePasswordPage)
