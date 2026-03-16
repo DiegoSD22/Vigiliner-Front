@@ -13,6 +13,8 @@ export interface LoginResponseDto {
   roles?: AuthRole[];
   permissions?: string[];
   primaryRole?: AuthRole;
+  requiresMfa?: boolean;
+  mfaToken?: string;
 }
 
 /**

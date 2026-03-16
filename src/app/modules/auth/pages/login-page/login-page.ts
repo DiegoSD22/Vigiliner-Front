@@ -6,6 +6,7 @@ import { Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { Auth } from '../../services/auth';
+import { LoginResultDto } from '@vigiliner/shared/dtos/auth';
 
 /**
  * LoginPage Component
@@ -89,11 +90,14 @@ export class LoginPage {
 
   // === Handlers privados ===
 
-  private handleLoginSuccess(result: { primaryRole?: string }): void {
-    // Determinar destino basado en rol
+  private handleLoginSuccess(result: LoginResultDto): void {
+    if (result.requiresMfa) {
+      this.router.navigate(['/auth/login/mfa'], { state: { mfaToken: result.mfaToken } });
+      return;
+    }
+
     const role = result.primaryRole || 'admin';
     const destination = role === 'super-admin' ? '/super-dashboard' : '/dashboard';
-
     this.router.navigate([destination]);
   }
 

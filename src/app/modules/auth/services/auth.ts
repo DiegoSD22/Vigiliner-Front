@@ -37,9 +37,15 @@ export class Auth {
           roles: response.data.roles,
           permissions: response.data.permissions,
           primaryRole: response.data.primaryRole,
+          requiresMfa: response.data.requiresMfa,
+          mfaToken: response.data.mfaToken,
           message: typeof response.message === 'string' ? response.message : undefined,
         })),
-        tap((result) => this.persistLoginData(result))
+        tap((result) => {
+          if (!result.requiresMfa) {
+            this.persistLoginData(result);
+          }
+        })
       );
   }
 
@@ -63,6 +69,15 @@ export class Auth {
     }
   }
 
+
+  verifyMfaOtp(mfaToken: string, otp: string): Observable<LoginResultDto> {
+    return this.http
+      .post<ApiResponse<LoginResponseDto>>(`${this.apiUrl}/verify-mfa`, { mfaToken, otp })
+      .pipe(
+        map((response) => ({ ...response.data, message: typeof response.message === 'string' ? response.message : undefined })),
+        tap((result) => this.persistLoginData(result))
+      );
+  }
 
   register(name: string, email: string, password: string): Observable<ApiResponse<unknown>> {
     const payload: RegisterRequestDto = { name, email, password };

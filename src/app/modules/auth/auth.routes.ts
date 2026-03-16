@@ -10,9 +10,18 @@ export const authRoutes: Routes = [
         loadComponent: () => import('./pages/login-page/login-page').then((m) => m.LoginPage)
     },
     {
+        path: 'login/mfa',
+        canActivate: [loginGuard],
+        loadComponent: () => import('./pages/mfa-page/mfa-page').then((m) => m.MfaPage)
+    },
+    {
         path: 'register',
         canActivate: [loginGuard],
         loadComponent: () => import('./pages/register-page/register-page').then((m) => m.RegisterPage)
+    },
+    {
+        path: 'register/verify-email',
+        loadComponent: () => import('./pages/verify-email-page/verify-email-page').then((m) => m.VerifyEmailPage)
     },
     {
         path: 'forgot-password',
@@ -20,12 +29,8 @@ export const authRoutes: Routes = [
         loadComponent: () => import('./pages/forgot-password-page/forgot-password-page').then((m) => m.ForgotPasswordPage)
     },
     {
-        path: 'reset-password',
+        path: 'forgot-password/reset-password',
         loadComponent: () => import('./pages/reset-password-page/reset-password-page').then((m) => m.ResetPasswordPage)
-    },
-    {
-        path: 'verify-email',
-        loadComponent: () => import('./pages/verify-email-page/verify-email-page').then((m) => m.VerifyEmailPage)
     },
     {
         path: 'change-password',

@@ -1,0 +1,67 @@
+<main class="auth-shell flex min-h-screen items-center px-4 py-8 sm:px-8">
+  <div class="mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-base-300/60 bg-base-100/80 shadow-2xl backdrop-blur">
+    <section class="p-6 sm:p-10">
+      <div class="mb-8 flex items-center justify-between">
+        <a class="flex items-center gap-3" routerLink="/">
+          <div class="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-content shadow-lg shadow-primary/30">
+            V
+          </div>
+          <div>
+            <p class="brand-title text-lg leading-none">Vigiliner</p>
+            <p class="text-xs opacity-70">Verificacion en dos pasos</p>
+          </div>
+        </a>
+        <a class="btn btn-ghost btn-sm" routerLink="/auth/login">Volver</a>
+      </div>
+
+      <div class="mb-2 grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-3xl text-primary">
+        🔐
+      </div>
+
+      <h2 class="brand-title mt-4 text-3xl">Verificacion MFA</h2>
+      <p class="mt-2 text-sm opacity-75">
+        Hemos enviado un codigo de 6 digitos a tu correo electronico. Ingresalo para continuar.
+      </p>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error mt-6" role="alert" aria-live="polite">
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="otpForm" (ngSubmit)="verify()" class="mt-7 space-y-5" novalidate>
+        <label class="form-control w-full">
+          <span class="label-text mb-2 text-sm">Codigo de verificacion</span>
+          <input
+            type="text"
+            inputmode="numeric"
+            formControlName="otp"
+            autocomplete="one-time-code"
+            maxlength="6"
+            class="input input-bordered w-full bg-base-200 text-center text-2xl tracking-[0.5em]"
+            placeholder="------"
+            [class.input-error]="otpControl?.invalid && otpControl?.touched"
+          />
+          @if (otpControl?.touched && otpControl?.errors?.['required']) {
+            <span class="label-text-alt mt-2 text-error">El codigo es obligatorio.</span>
+          }
+          @if (otpControl?.touched && otpControl?.errors?.['pattern']) {
+            <span class="label-text-alt mt-2 text-error">El codigo debe ser de 6 digitos numericos.</span>
+          }
+        </label>
+
+        <button type="submit" [disabled]="isLoading()" class="btn btn-primary w-full">
+          @if (isLoading()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          }
+          {{ isLoading() ? 'Verificando...' : 'Verificar codigo' }}
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm opacity-70">
+        ¿No recibiste el codigo?
+        <a class="link-primary" routerLink="/auth/login">Vuelve a iniciar sesion.</a>
+      </p>
+    </section>
+  </div>
+</main>

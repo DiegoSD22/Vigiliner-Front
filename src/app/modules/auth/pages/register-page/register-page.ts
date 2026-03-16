@@ -93,7 +93,7 @@ export class RegisterPage {
         this.successMessage.set('Cuenta creada exitosamente. Revisa tu correo para verificar tu cuenta.');
         
         setTimeout(() => {
-          this.router.navigate(['/auth/login']);
+          this.router.navigate(['/auth/register/verify-email']);
         }, 3000);
       },
       error: (error) => {
