@@ -20,7 +20,7 @@
     </div>
   }
 
-  @if (isLoading()) {
+  @if (isLoadingOrganization()) {
     <div class="grid min-h-72 place-items-center rounded-4xl border border-base-300 bg-base-100">
       <span class="loading loading-spinner loading-lg"></span>
     </div>
@@ -80,12 +80,12 @@
             <p class="mt-2 text-2xl font-bold">{{ admins().length }}</p>
           </article>
           <article class="rounded-2xl bg-success/10 px-4 py-3 text-center">
-            <p class="text-xs uppercase tracking-[0.18em] text-success/75">Activos</p>
-            <p class="mt-2 text-2xl font-bold text-success">{{ activeAdmins() }}</p>
+            <p class="text-xs uppercase tracking-[0.18em] text-success/75">Org Admin</p>
+            <p class="mt-2 text-2xl font-bold text-success">{{ orgAdminCount() }}</p>
           </article>
           <article class="rounded-2xl bg-info/10 px-4 py-3 text-center">
-            <p class="text-xs uppercase tracking-[0.18em] text-info/75">Invitados</p>
-            <p class="mt-2 text-2xl font-bold text-info">{{ invitedAdmins() }}</p>
+            <p class="text-xs uppercase tracking-[0.18em] text-info/75">Roles extra</p>
+            <p class="mt-2 text-2xl font-bold text-info">{{ customRoleCount() }}</p>
           </article>
         </div>
       </div>
@@ -95,7 +95,7 @@
           <svg class="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
           </svg>
-          <input #searchInput type="text" class="grow" placeholder="Buscar administrador por nombre o email" [value]="adminSearchTerm()" (input)="setAdminSearchTerm(searchInput.value)" />
+          <input #searchInput type="text" class="grow" placeholder="Buscar por nombre, correo o username" [value]="adminSearchTerm()" (input)="setAdminSearchTerm(searchInput.value)" />
         </label>
 
         <button type="button" class="btn btn-primary" (click)="openCreateAdmin()">Nuevo administrador</button>
@@ -107,33 +107,47 @@
             <thead>
               <tr>
                 <th>Administrador</th>
-                <th>Rol</th>
-                <th>Estado</th>
-                <th>Último acceso</th>
+                <th>Username</th>
+                <th>Roles</th>
+                <th>Actualizado</th>
                 <th class="text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              @for (admin of filteredAdmins(); track trackByAdminId($index, admin)) {
+              @if (isLoadingAdmins()) {
                 <tr>
-                  <td>
-                    <div class="font-semibold">{{ admin.name }}</div>
-                    <div class="text-sm opacity-65">{{ admin.email }}</div>
-                  </td>
-                  <td><span class="badge badge-ghost badge-sm">{{ admin.role === 'OWNER' ? 'Owner' : 'Admin' }}</span></td>
-                  <td><span [class]="adminStatusClass(admin.status)">{{ adminStatusLabel(admin.status) }}</span></td>
-                  <td>{{ admin.lastAccessAt ? (admin.lastAccessAt | date: 'dd/MM/yyyy HH:mm') : 'Sin acceso aún' }}</td>
-                  <td>
-                    <div class="flex justify-end gap-2">
-                      <button type="button" class="btn btn-ghost btn-xs" (click)="openEditAdmin(admin)">Editar</button>
-                      <button type="button" class="btn btn-ghost btn-xs text-error" (click)="requestDeleteAdmin(admin)">Retirar</button>
-                    </div>
+                  <td colspan="5" class="py-10 text-center">
+                    <span class="loading loading-spinner loading-md"></span>
                   </td>
                 </tr>
-              } @empty {
-                <tr>
-                  <td colspan="5" class="py-10 text-center text-sm opacity-70">No hay administradores asociados para esta empresa.</td>
-                </tr>
+              } @else {
+                @for (admin of filteredAdmins(); track trackByAdminId($index, admin)) {
+                  <tr>
+                    <td>
+                      <div class="font-semibold">{{ admin.name }}</div>
+                      <div class="text-sm opacity-65">{{ admin.email }}</div>
+                    </td>
+                    <td class="font-mono text-xs">{{ admin.username }}</td>
+                    <td>
+                      <div class="flex flex-wrap gap-1">
+                        @for (roleSlug of adminRoleLabels(admin); track roleSlug) {
+                          <span [class]="roleBadgeClass(roleSlug)">{{ roleSlug }}</span>
+                        }
+                      </div>
+                    </td>
+                    <td>{{ admin.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                    <td>
+                      <div class="flex justify-end gap-2">
+                        <button type="button" class="btn btn-ghost btn-xs" (click)="openEditAdmin(admin)">Editar</button>
+                        <button type="button" class="btn btn-ghost btn-xs text-error" (click)="requestDeleteAdmin(admin)">Retirar</button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="py-10 text-center text-sm opacity-70">No hay administradores asociados para esta empresa.</td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
@@ -148,6 +162,7 @@
 
   <app-confirm-dialog
     [open]="!!deleteCandidate()"
+    [busy]="isRemovingAdmin()"
     title="Retirar administrador"
     ariaLabel="Confirmar retiro de administrador"
     [message]="'Vas a retirar a ' + (deleteCandidate()?.name ?? 'este administrador') + ' de la empresa. Podrás volver a asociarlo más adelante.'"
@@ -194,20 +209,28 @@
             </label>
 
             <label class="form-control">
-              <span class="label-text mb-2 font-medium">Rol</span>
-              <select class="select select-bordered" formControlName="role">
-                <option value="OWNER">Owner</option>
-                <option value="ADMIN">Admin</option>
-              </select>
+              <span class="label-text mb-2 font-medium">Username (opcional)</span>
+              <input type="text" class="input input-bordered" formControlName="username" placeholder="admin-cliente" />
+              @if (adminForm.controls.username.touched && adminForm.controls.username.errors?.['pattern']) {
+                <span class="label-text-alt mt-2 text-error">Solo letras, números, punto, guion y guion bajo.</span>
+              }
             </label>
 
             <label class="form-control">
-              <span class="label-text mb-2 font-medium">Estado</span>
-              <select class="select select-bordered" formControlName="status">
-                <option value="INVITED">Invitado</option>
-                <option value="ACTIVE">Activo</option>
-                <option value="SUSPENDED">Suspendido</option>
-              </select>
+              <span class="label-text mb-2 font-medium">Contraseña {{ drawerMode() === 'edit' ? '(opcional)' : '' }}</span>
+              <input type="password" class="input input-bordered" formControlName="password" placeholder="Mínimo 8 caracteres" />
+              @if (adminForm.controls.password.touched && adminForm.controls.password.errors?.['required']) {
+                <span class="label-text-alt mt-2 text-error">La contraseña es obligatoria.</span>
+              }
+              @if (adminForm.controls.password.touched && adminForm.controls.password.errors?.['minlength']) {
+                <span class="label-text-alt mt-2 text-error">La contraseña debe tener al menos 8 caracteres.</span>
+              }
+            </label>
+
+            <label class="form-control md:col-span-2">
+              <span class="label-text mb-2 font-medium">Roles por slug</span>
+              <input type="text" class="input input-bordered" formControlName="roleSlugs" placeholder="org-admin, manager" />
+              <span class="label-text-alt mt-2 opacity-70">Separados por coma. Si no indicas uno, usamos `org-admin`.</span>
             </label>
           </div>
 

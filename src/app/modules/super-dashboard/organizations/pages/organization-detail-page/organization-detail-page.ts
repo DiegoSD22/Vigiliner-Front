@@ -9,8 +9,9 @@ import { finalize } from 'rxjs';
 import { ConfirmDialogComponent } from '@vigiliner/shared/design-system/confirm-dialog/confirm-dialog.component';
 
 import { OrganizationDto } from '../../interfaces/organizations.dto';
-import { CreateOrganizationAdminDto, OrganizationAdminDto, OrganizationAdminStatus } from '../../interfaces/organization-admin.dto';
+import { CreateOrganizationAdminDto, OrganizationAdminDto, UpdateOrganizationAdminDto } from '../../interfaces/organization-admin.dto';
 import { OrganizationsService } from '../../services/organizations.service';
+import { OrganizationUsersService } from '../../services/organization-users.service';
 
 @Component({
   selector: 'app-organization-detail-page',
@@ -23,21 +24,24 @@ export class OrganizationDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly organizationsService = inject(OrganizationsService);
+  private readonly organizationUsersService = inject(OrganizationUsersService);
 
-  readonly isLoading = signal(false);
+  readonly isLoadingOrganization = signal(false);
+  readonly isLoadingAdmins = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
   readonly organization = signal<OrganizationDto | null>(null);
   readonly organizationId = signal(this.route.snapshot.paramMap.get('id') ?? '');
 
-  readonly admins = signal<OrganizationAdminDto[]>(this.buildMockAdmins());
+  readonly admins = signal<OrganizationAdminDto[]>([]);
   readonly adminSearchTerm = signal('');
 
   readonly drawerOpen = signal(false);
   readonly drawerMode = signal<'create' | 'edit'>('create');
   readonly selectedAdminId = signal<string | null>(null);
   readonly isSavingAdmin = signal(false);
+  readonly isRemovingAdmin = signal(false);
   readonly deleteCandidate = signal<OrganizationAdminDto | null>(null);
 
   readonly filteredAdmins = computed(() => {
@@ -48,22 +52,32 @@ export class OrganizationDetailPage {
         return true;
       }
 
-      return admin.name.toLowerCase().includes(term) || admin.email.toLowerCase().includes(term);
+      return (
+        admin.name.toLowerCase().includes(term) ||
+        admin.email.toLowerCase().includes(term) ||
+        admin.username.toLowerCase().includes(term)
+      );
     });
   });
 
-  readonly activeAdmins = computed(() => this.admins().filter((admin) => admin.status === 'ACTIVE').length);
-  readonly invitedAdmins = computed(() => this.admins().filter((admin) => admin.status === 'INVITED').length);
+  readonly orgAdminCount = computed(
+    () => this.admins().filter((admin) => admin.roles.some((role) => role.role.slug === 'org-admin')).length
+  );
+  readonly customRoleCount = computed(
+    () => this.admins().filter((admin) => admin.roles.some((role) => role.role.slug !== 'org-admin')).length
+  );
 
   readonly adminForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    role: this.fb.control<'OWNER' | 'ADMIN'>('ADMIN', { validators: [Validators.required] }),
-    status: this.fb.control<OrganizationAdminStatus>('INVITED', { validators: [Validators.required] }),
+    username: ['', [Validators.minLength(3), Validators.maxLength(50), Validators.pattern(/^[a-zA-Z0-9._-]+$/)]],
+    password: ['', [Validators.minLength(8)]],
+    roleSlugs: ['org-admin', [Validators.required]],
   });
 
   constructor() {
     this.loadOrganization();
+    this.loadAdmins();
   }
 
   loadOrganization(): void {
@@ -74,16 +88,38 @@ export class OrganizationDetailPage {
       return;
     }
 
-    this.isLoading.set(true);
+    this.isLoadingOrganization.set(true);
     this.errorMessage.set(null);
 
     this.organizationsService
       .findOne(id)
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => this.isLoadingOrganization.set(false)))
       .subscribe({
         next: (response) => this.organization.set(response.data),
         error: (error: HttpErrorResponse) => {
           this.errorMessage.set(this.extractErrorMessage(error, 'No fue posible cargar el detalle de la empresa.'));
+        },
+      });
+  }
+
+  loadAdmins(): void {
+    const organizationId = this.organizationId();
+
+    if (!organizationId) {
+      return;
+    }
+
+    this.isLoadingAdmins.set(true);
+
+    this.organizationUsersService
+      .findAll(organizationId)
+      .pipe(finalize(() => this.isLoadingAdmins.set(false)))
+      .subscribe({
+        next: (response) => this.admins.set(response.data),
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage.set(
+            this.extractErrorMessage(error, 'No fue posible cargar los administradores de la empresa.')
+          );
         },
       });
   }
@@ -95,11 +131,13 @@ export class OrganizationDetailPage {
   openCreateAdmin(): void {
     this.drawerMode.set('create');
     this.selectedAdminId.set(null);
+    this.setPasswordValidators(true);
     this.adminForm.reset({
       name: '',
       email: '',
-      role: 'ADMIN',
-      status: 'INVITED',
+      username: '',
+      password: '',
+      roleSlugs: 'org-admin',
     });
     this.drawerOpen.set(true);
   }
@@ -107,11 +145,13 @@ export class OrganizationDetailPage {
   openEditAdmin(admin: OrganizationAdminDto): void {
     this.drawerMode.set('edit');
     this.selectedAdminId.set(admin.id);
+    this.setPasswordValidators(false);
     this.adminForm.reset({
       name: admin.name,
       email: admin.email,
-      role: admin.role,
-      status: admin.status,
+      username: admin.username,
+      password: '',
+      roleSlugs: admin.roles.map((role) => role.role.slug).join(', '),
     });
     this.drawerOpen.set(true);
   }
@@ -130,21 +170,22 @@ export class OrganizationDetailPage {
     this.successMessage.set(null);
     this.errorMessage.set(null);
 
-    const payload: CreateOrganizationAdminDto = {
-      ...this.adminForm.getRawValue(),
-      name: this.adminForm.getRawValue().name.trim(),
-      email: this.adminForm.getRawValue().email.trim().toLowerCase(),
+    const formValue = this.adminForm.getRawValue();
+    const normalizedRoleSlugs = formValue.roleSlugs
+      .split(',')
+      .map((slug) => slug.trim())
+      .filter(Boolean);
+
+    const createPayload: CreateOrganizationAdminDto = {
+      name: formValue.name.trim(),
+      email: formValue.email.trim().toLowerCase(),
+      username: formValue.username.trim() || undefined,
+      password: formValue.password,
+      roleSlugs: normalizedRoleSlugs.length > 0 ? normalizedRoleSlugs : ['org-admin'],
     };
 
     if (this.drawerMode() === 'create') {
-      const createdAdmin: OrganizationAdminDto = {
-        id: `ORG-ADMIN-${Date.now()}`,
-        ...payload,
-        lastAccessAt: null,
-      };
-
-      this.admins.update((current) => [createdAdmin, ...current]);
-      this.finishAdminSave('Administrador asociado exitosamente.');
+      this.createAdmin(createPayload);
       return;
     }
 
@@ -155,18 +196,15 @@ export class OrganizationDetailPage {
       return;
     }
 
-    this.admins.update((current) =>
-      current.map((admin) =>
-        admin.id === adminId
-          ? {
-              ...admin,
-              ...payload,
-            }
-          : admin
-      )
-    );
+    const updatePayload: UpdateOrganizationAdminDto = {
+      name: createPayload.name,
+      email: createPayload.email,
+      username: createPayload.username,
+      password: formValue.password.trim() ? createPayload.password : undefined,
+      roleSlugs: createPayload.roleSlugs,
+    };
 
-    this.finishAdminSave('Administrador actualizado exitosamente.');
+    this.updateAdmin(adminId, updatePayload);
   }
 
   requestDeleteAdmin(admin: OrganizationAdminDto): void {
@@ -179,38 +217,42 @@ export class OrganizationDetailPage {
 
   confirmDeleteAdmin(): void {
     const candidate = this.deleteCandidate();
+    const organizationId = this.organizationId();
 
-    if (!candidate) {
+    if (!candidate || !organizationId) {
       return;
     }
 
-    this.admins.update((current) => current.filter((admin) => admin.id !== candidate.id));
-    this.deleteCandidate.set(null);
-    this.successMessage.set('Administrador retirado de la empresa.');
+    this.isRemovingAdmin.set(true);
+    this.errorMessage.set(null);
+
+    this.organizationUsersService
+      .remove(organizationId, candidate.id)
+      .pipe(finalize(() => this.isRemovingAdmin.set(false)))
+      .subscribe({
+        next: () => {
+          this.admins.update((current) => current.filter((admin) => admin.id !== candidate.id));
+          this.deleteCandidate.set(null);
+          this.successMessage.set('Administrador retirado de la empresa.');
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage.set(
+            this.extractErrorMessage(error, 'No fue posible retirar el administrador de la empresa.')
+          );
+        },
+      });
   }
 
-  adminStatusLabel(status: OrganizationAdminStatus): string {
-    if (status === 'ACTIVE') {
-      return 'Activo';
-    }
-
-    if (status === 'INVITED') {
-      return 'Invitado';
-    }
-
-    return 'Suspendido';
+  adminRoleLabels(admin: OrganizationAdminDto): string[] {
+    return admin.roles.map((item) => item.role.slug);
   }
 
-  adminStatusClass(status: OrganizationAdminStatus): string {
-    if (status === 'ACTIVE') {
-      return 'badge badge-success badge-sm';
+  roleBadgeClass(slug: string): string {
+    if (slug === 'org-admin') {
+      return 'badge badge-primary badge-sm';
     }
 
-    if (status === 'INVITED') {
-      return 'badge badge-info badge-sm';
-    }
-
-    return 'badge badge-warning badge-sm';
+    return 'badge badge-ghost badge-sm';
   }
 
   organizationStatusLabel(status: OrganizationDto['status'] | undefined): string {
@@ -241,31 +283,65 @@ export class OrganizationDetailPage {
     return admin.id;
   }
 
-  private finishAdminSave(message: string): void {
-    this.isSavingAdmin.set(false);
-    this.drawerOpen.set(false);
-    this.successMessage.set(message);
+  private setPasswordValidators(required: boolean): void {
+    const passwordControl = this.adminForm.controls.password;
+    const validators = required ? [Validators.required, Validators.minLength(8)] : [Validators.minLength(8)];
+    passwordControl.setValidators(validators);
+    passwordControl.updateValueAndValidity();
   }
 
-  private buildMockAdmins(): OrganizationAdminDto[] {
-    return [
-      {
-        id: 'ORG-ADMIN-001',
-        name: 'Laura Mendoza',
-        email: 'laura.mendoza@empresa.com',
-        role: 'OWNER',
-        status: 'ACTIVE',
-        lastAccessAt: '2026-03-15T14:22:00.000Z',
-      },
-      {
-        id: 'ORG-ADMIN-002',
-        name: 'Carlos Pinzón',
-        email: 'carlos.pinzon@empresa.com',
-        role: 'ADMIN',
-        status: 'INVITED',
-        lastAccessAt: null,
-      },
-    ];
+  private createAdmin(payload: CreateOrganizationAdminDto): void {
+    const organizationId = this.organizationId();
+
+    if (!organizationId) {
+      this.isSavingAdmin.set(false);
+      this.errorMessage.set('No se encontró el contexto de organización para crear el usuario.');
+      return;
+    }
+
+    this.organizationUsersService
+      .create(organizationId, payload)
+      .pipe(finalize(() => this.isSavingAdmin.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.admins.update((current) => [response.data, ...current]);
+          this.drawerOpen.set(false);
+          this.successMessage.set('Administrador asociado exitosamente.');
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage.set(
+            this.extractErrorMessage(error, 'No fue posible asociar el administrador a la empresa.')
+          );
+        },
+      });
+  }
+
+  private updateAdmin(adminId: string, payload: UpdateOrganizationAdminDto): void {
+    const organizationId = this.organizationId();
+
+    if (!organizationId) {
+      this.isSavingAdmin.set(false);
+      this.errorMessage.set('No se encontró el contexto de organización para actualizar el usuario.');
+      return;
+    }
+
+    this.organizationUsersService
+      .update(organizationId, adminId, payload)
+      .pipe(finalize(() => this.isSavingAdmin.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.admins.update((current) =>
+            current.map((admin) => (admin.id === adminId ? response.data : admin))
+          );
+          this.drawerOpen.set(false);
+          this.successMessage.set('Administrador actualizado exitosamente.');
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage.set(
+            this.extractErrorMessage(error, 'No fue posible actualizar el administrador de la empresa.')
+          );
+        },
+      });
   }
 
   private extractErrorMessage(error: HttpErrorResponse, fallback: string): string {
